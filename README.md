@@ -55,13 +55,67 @@ cp apps/auth-service/.env.example apps/auth-service/.env
 docker compose up -d rabbitmq redis postgres-auth postgres-user postgres-route-maps postgres-bus-seat postgres-booking postgres-payment postgres-modification postgres-notification
 ```
 
-Apply Prisma schema to each service database before first use (per service):
+### 3. Create schemas & seed data
+
+Each service owns its own database, so schema push and seeding run per service.
+The helper script does all eight in order:
 
 ```sh
-cd apps/auth-service && pnpm prisma migrate deploy   # or: pnpm prisma db push
+pnpm db:setup     # push schemas + seed (first-time setup)
 ```
 
-### 3. Backend services
+Or run the steps individually:
+
+| Script | Description |
+| --- | --- |
+| `pnpm db:push` | Sync every Prisma schema to its database |
+| `pnpm db:seed` | Insert initial + sample data (idempotent, safe to re-run) |
+| `pnpm db:reset` | Drop and recreate all tables (**destroys data**) |
+| `pnpm db:setup` | `db:push` followed by `db:seed` |
+
+To wipe and re-seed from scratch:
+
+```sh
+pnpm db:reset && pnpm db:seed
+```
+
+Single service only:
+
+```sh
+cd apps/auth-service
+npx prisma db push
+npx prisma db seed
+```
+
+#### What gets seeded
+
+Fixtures live in `tools/seed/seed-data.ts` and use fixed UUIDs so records line
+up across service databases (a booking's `userId` matches a real auth user, a
+trip's `routeId` matches a real route).
+
+| Service | Sample data |
+| --- | --- |
+| auth / user | 4 accounts: 1 admin, 1 customer staff, 2 passengers |
+| route-maps | 5 locations (Colombo, Kandy, Galle, Jaffna, Matara), 4 routes |
+| bus-seat | 3 buses + 2+2 seat layouts, 4 upcoming trips |
+| booking | 4 bookings (3 confirmed, 1 cancelled) |
+| payment | 4 payments (succeeded / pending / refunded) |
+| modification | 1 cancellation + 1 completed refund |
+| notification | 3 notification log entries |
+
+**Seed logins** — all use password `Password123!`:
+
+| Phone | Role |
+| --- | --- |
+| `0770000001` | `ADMIN_STAFF` |
+| `0770000002` | `CUSTOMER_STAFF` |
+| `0771111111` | `PASSENGER` |
+| `0772222222` | `PASSENGER` |
+
+Trip departures are generated relative to the current date, so seeded trips are
+always in the future and show up in search.
+
+### 4. Backend services
 
 Serve individually (each in its own terminal):
 
@@ -83,7 +137,7 @@ Or serve several at once:
 npx nx run-many -t serve --projects=api-gateway,auth-service,user-service,route-maps-service,bus-seat-service,booking-service,payment-service,modification-service,notification-service
 ```
 
-### 4. Frontends
+### 5. Frontends
 
 ```sh
 pnpm dev:dashboard        # dashboard-web  → http://localhost:3100
@@ -168,3 +222,7 @@ names (`rabbitmq`, `postgres-auth`, `auth-service`, …) as configured in
 | `pnpm dev:dashboard` | Next.js dashboard on 3100 |
 | `pnpm dev:passenger-web` | Next.js passenger web app |
 | `pnpm start:mobile` | Expo start for passenger app |
+| `pnpm db:setup` | Push all Prisma schemas, then seed |
+| `pnpm db:push` | Sync all Prisma schemas |
+| `pnpm db:seed` | Seed initial + sample data (idempotent) |
+| `pnpm db:reset` | Drop/recreate all tables (destroys data) |
