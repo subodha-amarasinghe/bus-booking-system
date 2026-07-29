@@ -20,7 +20,7 @@ const config: runtime.GetPrismaClientConfig = {
   "clientVersion": "7.9.1",
   "engineVersion": "e922089b7d7502aff4249d5da3420f6fa55fc6ad",
   "activeProvider": "postgresql",
-  "inlineSchema": "generator client {\n  provider = \"prisma-client\"\n  output   = \"../src/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\nmodel Bus {\n  id          String      @id @default(uuid())\n  plateNumber String      @unique\n  name        String?\n  capacity    Int\n  operatorId  String?\n  isActive    Boolean     @default(true)\n  createdAt   DateTime    @default(now())\n  updatedAt   DateTime    @updatedAt\n  seatLayout  SeatLayout?\n  trips       Trip[]\n}\n\nmodel SeatLayout {\n  id        String   @id @default(uuid())\n  busId     String   @unique\n  rows      Int\n  columns   Int\n  seats     Json\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n  bus       Bus      @relation(fields: [busId], references: [id])\n}\n\nmodel Trip {\n  id             String    @id @default(uuid())\n  busId          String\n  routeId        String\n  departureAt    DateTime\n  arrivalAt      DateTime?\n  fareAmount     Float\n  currency       String    @default(\"LKR\")\n  availableSeats Int?\n  status         String    @default(\"SCHEDULED\")\n  createdAt      DateTime  @default(now())\n  updatedAt      DateTime  @updatedAt\n  bus            Bus       @relation(fields: [busId], references: [id])\n}\n",
+  "inlineSchema": "generator client {\n  provider     = \"prisma-client\"\n  output       = \"../src/generated/prisma\"\n  moduleFormat = \"cjs\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\nmodel Bus {\n  id          String      @id @default(uuid())\n  plateNumber String      @unique\n  name        String?\n  capacity    Int\n  operatorId  String?\n  isActive    Boolean     @default(true)\n  createdAt   DateTime    @default(now())\n  updatedAt   DateTime    @updatedAt\n  seatLayout  SeatLayout?\n  trips       Trip[]\n}\n\nmodel SeatLayout {\n  id        String   @id @default(uuid())\n  busId     String   @unique\n  rows      Int\n  columns   Int\n  seats     Json\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n  bus       Bus      @relation(fields: [busId], references: [id])\n}\n\nmodel Trip {\n  id             String    @id @default(uuid())\n  busId          String\n  routeId        String\n  departureAt    DateTime\n  arrivalAt      DateTime?\n  fareAmount     Float\n  currency       String    @default(\"LKR\")\n  availableSeats Int?\n  status         String    @default(\"SCHEDULED\")\n  createdAt      DateTime  @default(now())\n  updatedAt      DateTime  @updatedAt\n  bus            Bus       @relation(fields: [busId], references: [id])\n}\n",
   "runtimeDataModel": {
     "models": {},
     "enums": {},
@@ -45,10 +45,10 @@ async function decodeBase64AsWasm(wasmBase64: string): Promise<WebAssembly.Modul
 }
 
 config.compilerWasm = {
-  getRuntime: async () => await import("@prisma/client/runtime/query_compiler_fast_bg.postgresql.mjs"),
+  getRuntime: async () => await import("@prisma/client/runtime/query_compiler_fast_bg.postgresql.js"),
 
   getQueryCompilerWasmModule: async () => {
-    const { wasm } = await import("@prisma/client/runtime/query_compiler_fast_bg.postgresql.wasm-base64.mjs")
+    const { wasm } = await import("@prisma/client/runtime/query_compiler_fast_bg.postgresql.wasm-base64.js")
     return await decodeBase64AsWasm(wasm)
   },
 
