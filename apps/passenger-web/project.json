@@ -1,0 +1,9 @@
+{
+  "name": "passenger-web",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/passenger-web",
+  "projectType": "application",
+  "tags": ["scope:passenger", "platform:web"],
+  "// targets": "to see all targets run: nx show project passenger-web --web",
+  "targets": {}
+}

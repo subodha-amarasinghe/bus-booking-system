@@ -1,0 +1,16 @@
+{
+  "name": "passenger-mobile",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/passenger-mobile/src",
+  "projectType": "application",
+  "tags": ["scope:mobile"],
+  "targets": {
+    "start": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx expo start",
+        "cwd": "apps/passenger-mobile"
+      }
+    }
+  }
+}

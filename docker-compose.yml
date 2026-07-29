@@ -1,0 +1,292 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    environment:
+      RABBITMQ_DEFAULT_USER: bus
+      RABBITMQ_DEFAULT_PASS: bus
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    ports:
+      - '6379:6379'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-auth:
+    image: postgres:16-alpine
+    ports:
+      - '5433:5432'
+    environment:
+      POSTGRES_USER: bus
+      POSTGRES_PASSWORD: bus
+      POSTGRES_DB: auth_db
+    volumes:
+      - pg_auth_data:/var/lib/postgresql/data
+
+  postgres-user:
+    image: postgres:16-alpine
+    ports:
+      - '5434:5432'
+    environment:
+      POSTGRES_USER: bus
+      POSTGRES_PASSWORD: bus
+      POSTGRES_DB: user_db
+    volumes:
+      - pg_user_data:/var/lib/postgresql/data
+
+  postgres-route-maps:
+    image: postgres:16-alpine
+    ports:
+      - '5435:5432'
+    environment:
+      POSTGRES_USER: bus
+      POSTGRES_PASSWORD: bus
+      POSTGRES_DB: route_maps_db
+    volumes:
+      - pg_route_maps_data:/var/lib/postgresql/data
+
+  postgres-bus-seat:
+    image: postgres:16-alpine
+    ports:
+      - '5436:5432'
+    environment:
+      POSTGRES_USER: bus
+      POSTGRES_PASSWORD: bus
+      POSTGRES_DB: bus_seat_db
+    volumes:
+      - pg_bus_seat_data:/var/lib/postgresql/data
+
+  postgres-booking:
+    image: postgres:16-alpine
+    ports:
+      - '5437:5432'
+    environment:
+      POSTGRES_USER: bus
+      POSTGRES_PASSWORD: bus
+      POSTGRES_DB: booking_db
+    volumes:
+      - pg_booking_data:/var/lib/postgresql/data
+
+  postgres-payment:
+    image: postgres:16-alpine
+    ports:
+      - '5438:5432'
+    environment:
+      POSTGRES_USER: bus
+      POSTGRES_PASSWORD: bus
+      POSTGRES_DB: payment_db
+    volumes:
+      - pg_payment_data:/var/lib/postgresql/data
+
+  postgres-modification:
+    image: postgres:16-alpine
+    ports:
+      - '5439:5432'
+    environment:
+      POSTGRES_USER: bus
+      POSTGRES_PASSWORD: bus
+      POSTGRES_DB: modification_db
+    volumes:
+      - pg_modification_data:/var/lib/postgresql/data
+
+  postgres-notification:
+    image: postgres:16-alpine
+    ports:
+      - '5440:5432'
+    environment:
+      POSTGRES_USER: bus
+      POSTGRES_PASSWORD: bus
+      POSTGRES_DB: notification_db
+    volumes:
+      - pg_notification_data:/var/lib/postgresql/data
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: apps/api-gateway/Dockerfile
+    ports:
+      - '3000:3000'
+    environment:
+      PORT: 3000
+      RABBITMQ_URL: amqp://bus:bus@rabbitmq:5672
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      AUTH_SERVICE_URL: http://auth-service:3001
+      USER_SERVICE_URL: http://user-service:3002
+      ROUTE_MAPS_SERVICE_URL: http://route-maps-service:3003
+      BUS_SEAT_SERVICE_URL: http://bus-seat-service:3004
+      BOOKING_SERVICE_URL: http://booking-service:3020
+      PAYMENT_SERVICE_URL: http://payment-service:3006
+      MODIFICATION_SERVICE_URL: http://modification-service:3007
+      NOTIFICATION_SERVICE_URL: http://notification-service:3008
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: apps/auth-service/Dockerfile
+    ports:
+      - '3001:3001'
+    environment:
+      PORT: 3001
+      RABBITMQ_URL: amqp://bus:bus@rabbitmq:5672
+      DATABASE_URL: postgresql://bus:bus@postgres-auth:5432/auth_db
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      JWT_EXPIRES_IN: 8h
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres-auth:
+        condition: service_started
+
+  user-service:
+    build:
+      context: .
+      dockerfile: apps/user-service/Dockerfile
+    ports:
+      - '3002:3002'
+    environment:
+      PORT: 3002
+      RABBITMQ_URL: amqp://bus:bus@rabbitmq:5672
+      DATABASE_URL: postgresql://bus:bus@postgres-user:5432/user_db
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres-user:
+        condition: service_started
+
+  route-maps-service:
+    build:
+      context: .
+      dockerfile: apps/route-maps-service/Dockerfile
+    ports:
+      - '3003:3003'
+    environment:
+      PORT: 3003
+      RABBITMQ_URL: amqp://bus:bus@rabbitmq:5672
+      DATABASE_URL: postgresql://bus:bus@postgres-route-maps:5432/route_maps_db
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres-route-maps:
+        condition: service_started
+
+  bus-seat-service:
+    build:
+      context: .
+      dockerfile: apps/bus-seat-service/Dockerfile
+    ports:
+      - '3004:3004'
+    environment:
+      PORT: 3004
+      RABBITMQ_URL: amqp://bus:bus@rabbitmq:5672
+      DATABASE_URL: postgresql://bus:bus@postgres-bus-seat:5432/bus_seat_db
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres-bus-seat:
+        condition: service_started
+
+  booking-service:
+    build:
+      context: .
+      dockerfile: apps/booking-service/Dockerfile
+    ports:
+      - '3020:3020'
+    environment:
+      PORT: 3020
+      RABBITMQ_URL: amqp://bus:bus@rabbitmq:5672
+      DATABASE_URL: postgresql://bus:bus@postgres-booking:5432/booking_db
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      postgres-booking:
+        condition: service_started
+
+  payment-service:
+    build:
+      context: .
+      dockerfile: apps/payment-service/Dockerfile
+    ports:
+      - '3006:3006'
+    environment:
+      PORT: 3006
+      RABBITMQ_URL: amqp://bus:bus@rabbitmq:5672
+      DATABASE_URL: postgresql://bus:bus@postgres-payment:5432/payment_db
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      PAYMENT_PROVIDER_URL: ${PAYMENT_PROVIDER_URL:-}
+      PAYMENT_PROVIDER_KEY: ${PAYMENT_PROVIDER_KEY:-}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres-payment:
+        condition: service_started
+
+  modification-service:
+    build:
+      context: .
+      dockerfile: apps/modification-service/Dockerfile
+    ports:
+      - '3007:3007'
+    environment:
+      PORT: 3007
+      RABBITMQ_URL: amqp://bus:bus@rabbitmq:5672
+      DATABASE_URL: postgresql://bus:bus@postgres-modification:5432/modification_db
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres-modification:
+        condition: service_started
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: apps/notification-service/Dockerfile
+    ports:
+      - '3008:3008'
+    environment:
+      PORT: 3008
+      RABBITMQ_URL: amqp://bus:bus@rabbitmq:5672
+      DATABASE_URL: postgresql://bus:bus@postgres-notification:5432/notification_db
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres-notification:
+        condition: service_started
+
+volumes:
+  pg_auth_data:
+  pg_user_data:
+  pg_route_maps_data:
+  pg_bus_seat_data:
+  pg_booking_data:
+  pg_payment_data:
+  pg_modification_data:
+  pg_notification_data:

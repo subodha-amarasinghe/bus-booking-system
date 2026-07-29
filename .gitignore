@@ -1,8 +1,67 @@
+# Dependencies
 node_modules/
+
+# Builds & caches
 dist/
+tmp/
+out/
+build/
 .nx/
+.turbo/
+*.tsbuildinfo
+
+# Environment & secrets (keep committed templates)
 .env
-.env.local
+.env.*
+!.env.example
+!**/.env.example
+
+# Logs
 *.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
 .DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDEs (share launch/extensions; ignore local workspace state)
+.idea/
+*.swp
+*.swo
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+
+# Cursor local state (keep project rules)
+.cursor/*
+!.cursor/rules/
+
+# Next.js
+.next/
+**/.next/
+out/
+
+# Expo / React Native
 .expo/
+**/web-build/
+*.jks
+*.p8
+*.p12
+*.mobileprovision
+
+# Test / coverage
+coverage/
+.nyc_output/
+test-output/
+
+# Docker
+*.tar
+
+# Misc
+*.pem
+.cache/

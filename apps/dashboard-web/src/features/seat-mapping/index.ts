@@ -1,0 +1,1 @@
+export { SeatMappingPage } from './SeatMappingPage';

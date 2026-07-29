@@ -1,0 +1,17 @@
+{
+  "name": "@bus-booking/passenger-core",
+  "version": "0.0.1",
+  "private": true,
+  "type": "commonjs",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "dependencies": {
+    "@bus-booking/shared-types": "workspace:*",
+    "@bus-booking-system/shared-events": "workspace:*",
+    "@tanstack/react-query": "^5.62.8",
+    "react": "^18.3.1",
+    "tslib": "^2.3.0",
+    "zod": "^3.24.1",
+    "zustand": "^5.0.14"
+  }
+}

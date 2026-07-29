@@ -1,0 +1,21 @@
+{
+  "name": "passenger-core",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/passenger-core/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "options": {
+        "outputPath": "dist/libs/passenger-core",
+        "main": "libs/passenger-core/src/index.ts",
+        "tsConfig": "libs/passenger-core/tsconfig.lib.json",
+        "assets": []
+      }
+    }
+  }
+}

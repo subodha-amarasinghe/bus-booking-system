@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../dist/out-tsc",
+    "declaration": true,
+    "types": ["node"],
+    "paths": {
+      "@bus-booking/shared-events": [
+        "dist/libs/shared-events/src/index.d.ts"
+      ],
+      "@bus-booking/shared-types": [
+        "dist/libs/shared-types/src/index.d.ts"
+      ]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}

@@ -1,0 +1,28 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Booking {
+  id              String    @id @default(uuid())
+  tripId          String
+  userId          String
+  seatNo          String
+  status          String    @default("LOCKED")
+  passengerName   String
+  passengerPhone  String
+  fareAmount      Float     @default(0)
+  currency        String    @default("LKR")
+  lockToken       String?
+  lockExpiresAt   DateTime?
+  idempotencyKey  String?   @unique
+  confirmedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([tripId, seatNo, status])
+}

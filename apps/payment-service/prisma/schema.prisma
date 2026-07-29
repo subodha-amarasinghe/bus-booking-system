@@ -1,0 +1,23 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Payment {
+  id            String    @id @default(uuid())
+  bookingId     String
+  userId        String
+  amount        Float
+  currency      String    @default("LKR")
+  status        String    @default("PENDING")
+  method        String
+  providerRef   String?
+  failureReason String?
+  paidAt        DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}

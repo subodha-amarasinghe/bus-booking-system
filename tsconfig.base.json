@@ -1,0 +1,52 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "es2021",
+    "module": "esnext",
+    "lib": [
+      "es2021",
+      "dom"
+    ],
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "baseUrl": ".",
+    "strict": true,
+    "paths": {
+      "@bus-booking/shared-types": [
+        "libs/shared-types/src/index.ts"
+      ],
+      "@bus-booking/shared-types/nest": [
+        "libs/shared-types/src/nest.ts"
+      ],
+      "@bus-booking/shared-events": [
+        "libs/shared-events/src/index.ts"
+      ],
+      "@bus-booking/shared-utils": [
+        "libs/shared-utils/src/index.ts"
+      ],
+      "@bus-booking-system/shared-types": [
+        "./libs/shared-types/src/index.ts"
+      ],
+      "@bus-booking-system/shared-events": [
+        "./libs/shared-events/src/index.ts"
+      ],
+      "@bus-booking-system/shared-utils": [
+        "./libs/shared-utils/src/index.ts"
+      ],
+      "@bus-booking/passenger-core": [
+        "./libs/passenger-core/src/index.ts"
+      ]
+    }
+  },
+  "exclude": [
+    "node_modules",
+    "tmp"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "name": "@bus-booking/bus-seat-service",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "tslib": "2.8.1"
+  }
+}

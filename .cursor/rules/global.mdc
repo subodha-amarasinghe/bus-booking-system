@@ -1,0 +1,32 @@
+---
+description: Global engineering conventions for the bus booking monorepo
+alwaysApply: true
+---
+
+# Bus Booking System — Global Rules
+
+## Dependency injection
+
+- Prefer **constructor injection only** in NestJS services, controllers, and repositories.
+- Do not use `@Inject()` property injection or manual `ModuleRef.get` for routine wiring.
+
+## Validation & types
+
+- **Zod is the single validation source of truth.** Define schemas in `libs/shared-types` and derive TypeScript types with `z.infer`.
+- Do **not** duplicate DTO/entity types outside `libs/shared-types`. Import shared schemas and types instead.
+- Validate at boundaries (HTTP, RPC, events) with shared Zod schemas (e.g. Nest pipes wrapping Zod).
+- Import `ZodValidationPipe` from `@bus-booking/shared-types/nest` only (never from the main shared-types entry — frontends must not pull Nest).
+
+## Messaging
+
+- RabbitMQ **event names / routing keys must always be imported** from `@bus-booking/shared-events` constants.
+- Never hard-code event string literals in producers or consumers.
+
+## Data model
+
+- Use **UUID primary keys** for all persisted entities.
+- Isolate Prisma (and other ORMs) behind a **repository pattern** — application/domain code must not call Prisma clients directly.
+
+## Frontend notes
+
+- Dashboard (`dashboard-web`) and mobile (`passenger-mobile`) consume shared Zod schemas from `@bus-booking/shared-types` for forms and API payloads.

@@ -1,0 +1,30 @@
+# Recreated inside the image by pnpm install / nx build.
+node_modules
+**/node_modules
+dist
+tmp
+.nx
+.next
+**/.next
+out
+
+# VCS, editor, and local tooling.
+.git
+.github
+.vscode
+.idea
+.cursor
+
+# Local secrets. Compose supplies runtime env vars; .env.example stays.
+.env
+**/.env
+.env.development
+**/.env.development
+.env.production
+**/.env.production
+.env.local
+**/.env.local
+
+.expo
+**/.expo
+**/*.log
