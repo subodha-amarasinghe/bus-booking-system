@@ -9,6 +9,7 @@ const API_GATEWAY_URL =
 export interface PassengerSession {
   userId: string;
   phone?: string;
+  role?: string;
 }
 
 export async function getPassengerSession(): Promise<PassengerSession | null> {
@@ -28,9 +29,10 @@ export async function getPassengerSession(): Promise<PassengerSession | null> {
       userId?: string;
       sub?: string;
       phone?: string;
+      role?: string;
     };
     const userId = data.userId ?? data.sub;
-    return userId ? { userId, phone: data.phone } : null;
+    return userId ? { userId, phone: data.phone, role: data.role } : null;
   } catch {
     return null;
   }
@@ -38,4 +40,12 @@ export async function getPassengerSession(): Promise<PassengerSession | null> {
 
 export function getAccessToken(): string | undefined {
   return cookies().get(ACCESS_COOKIE)?.value;
+}
+
+/**
+ * Cookie-presence check for rendering nav affordances. It never touches the
+ * gateway, so layouts can branch on it without an extra round trip.
+ */
+export function hasPassengerCookie(): boolean {
+  return Boolean(cookies().get(ACCESS_COOKIE)?.value);
 }

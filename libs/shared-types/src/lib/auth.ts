@@ -24,6 +24,17 @@ export const ValidateTokenRequestSchema = z.object({
 });
 export type ValidateTokenRequest = z.infer<typeof ValidateTokenRequestSchema>;
 
+export const WsTokenRequestSchema = z.object({
+  userId: z.string().uuid(),
+});
+export type WsTokenRequest = z.infer<typeof WsTokenRequestSchema>;
+
+export const WsTokenResponseSchema = z.object({
+  token: z.string(),
+  expiresIn: z.number().int(),
+});
+export type WsTokenResponse = z.infer<typeof WsTokenResponseSchema>;
+
 export const AuthTokenResponseSchema = z.object({
   accessToken: z.string(),
   refreshToken: z.string(),

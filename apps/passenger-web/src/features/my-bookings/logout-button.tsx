@@ -1,13 +1,30 @@
 'use client';
 
+import { LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { Spinner } from '../../shared/components/LoadingBlock';
 
 export function LogoutButton() {
   const router = useRouter();
+  const [pending, setPending] = useState(false);
+
   async function logout() {
-    await fetch('/api/auth/logout', { method: 'POST' });
+    setPending(true);
+    await fetch('/api/auth/logout', { method: 'POST' }).catch(() => undefined);
     router.replace('/login');
     router.refresh();
   }
-  return <button className="secondary" onClick={logout}>Sign out</button>;
+
+  return (
+    <button
+      className="ui-btn-ghost min-h-[48px] w-full border border-slate-200 sm:w-auto"
+      disabled={pending}
+      onClick={logout}
+      type="button"
+    >
+      {pending ? <Spinner /> : <LogOut aria-hidden="true" className="h-4 w-4" />}
+      {pending ? 'Signing out…' : 'Sign out'}
+    </button>
+  );
 }

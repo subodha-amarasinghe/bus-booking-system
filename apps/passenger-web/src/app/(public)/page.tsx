@@ -1,32 +1,108 @@
+import { Armchair, ShieldCheck, Ticket, Zap } from 'lucide-react';
 import Link from 'next/link';
+import { TripSearchForm } from '../../features/search/trip-search-form';
+import { getLocations, getPopularRoutes } from '../../lib/locations';
+import { toDateInputValue } from '../../lib/format';
 
-export default function LandingPage() {
+const TRUST_POINTS = [
+  {
+    icon: Armchair,
+    title: 'Live seat map',
+    body: 'See exactly which seats are free, held, or booked in real time.',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Held while you pay',
+    body: 'Your seats are reserved for a few minutes so nobody takes them.',
+  },
+  {
+    icon: Zap,
+    title: 'Instant confirmation',
+    body: 'Tickets appear under My bookings the moment payment succeeds.',
+  },
+];
+
+export default async function LandingPage() {
+  const locations = await getLocations();
+  const popular = getPopularRoutes(locations);
+  const today = toDateInputValue();
+
   return (
-    <main>
-      <section className="hero">
-        <h1>Your next bus is a few taps away.</h1>
-        <p>Search routes, choose live seats, and pay securely from any device.</p>
+    <div className="space-y-10">
+      <section className="text-center sm:text-left">
+        <span className="ui-badge bg-brand-50 text-brand-700">
+          Sri Lanka intercity network
+        </span>
+        <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+          Find your next bus
+        </h1>
+        <p className="mt-2 text-base text-slate-600 sm:max-w-xl">
+          Compare departures, pick your seat on a live map, and pay securely —
+          all in under a minute.
+        </p>
       </section>
-      <section className="card">
-        <form className="search-form" action="/search" method="get">
-          <label>
-            From location ID
-            <input name="originLocationId" placeholder="Origin UUID" />
-          </label>
-          <label>
-            To location ID
-            <input name="destinationLocationId" placeholder="Destination UUID" />
-          </label>
-          <label>
-            Departure
-            <input name="departureDate" type="date" />
-          </label>
-          <button type="submit">Find trips</button>
-        </form>
+
+      <section aria-labelledby="search-heading" className="ui-card">
+        <h2 className="sr-only" id="search-heading">
+          Search for a trip
+        </h2>
+        <TripSearchForm locations={locations} />
       </section>
-      <p className="muted">
-        Already booked? <Link href="/login">Sign in to manage your trip</Link>.
+
+      {popular.length > 0 && (
+        <section aria-labelledby="popular-heading">
+          <h2
+            className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500"
+            id="popular-heading"
+          >
+            Popular routes
+          </h2>
+          <ul className="flex flex-wrap gap-2">
+            {popular.map((route) => (
+              <li key={route.label}>
+                <Link
+                  className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 shadow-sm transition hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700"
+                  href={`/search?originLocationId=${route.originLocationId}&destinationLocationId=${route.destinationLocationId}&departureDate=${today}`}
+                >
+                  <Ticket aria-hidden="true" className="h-4 w-4 text-brand-600" />
+                  {route.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <section aria-labelledby="why-heading">
+        <h2 className="sr-only" id="why-heading">
+          Why book here
+        </h2>
+        <ul className="grid gap-4 sm:grid-cols-3">
+          {TRUST_POINTS.map((point) => (
+            <li className="ui-card" key={point.title}>
+              <span className="grid h-10 w-10 place-items-center rounded-xl bg-brand-50 text-brand-600">
+                <point.icon aria-hidden="true" className="h-5 w-5" />
+              </span>
+              <p className="mt-3 text-sm font-semibold text-slate-900">
+                {point.title}
+              </p>
+              <p className="mt-1 text-sm text-slate-500">{point.body}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <p className="text-sm text-slate-500">
+        Already booked?{' '}
+        <Link className="font-semibold text-brand-700 hover:underline" href="/bookings">
+          View my bookings
+        </Link>{' '}
+        or{' '}
+        <Link className="font-semibold text-brand-700 hover:underline" href="/login">
+          sign in
+        </Link>
+        .
       </p>
-    </main>
+    </div>
   );
 }

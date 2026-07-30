@@ -80,10 +80,10 @@ export class PassengerApiError extends Error {
 
 const DEFAULT_PATHS: PassengerApiPaths = {
   tripSearch: '/trips/search',
-  seatMap: (tripId) => `/trips/${encodeURIComponent(tripId)}/seat-map`,
+  seatMap: (tripId) => `/trips/${encodeURIComponent(tripId)}/seats`,
   myBookings: '/bookings/me',
   lockSeat: '/bookings/lock-seat',
-  releaseSeats: '/bookings/release-seats',
+  releaseSeats: '/bookings/release-seat',
   confirmBooking: '/bookings/confirm',
 };
 

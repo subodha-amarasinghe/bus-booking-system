@@ -18,6 +18,15 @@ import { RedisLockExpiryService } from '../redis/redis-lock-expiry.service';
           queueOptions: { durable: true },
         },
       },
+      {
+        name: 'BUS_SEAT_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: [process.env.RABBITMQ_URL ?? 'amqp://localhost:5672'],
+          queue: 'bus_seat_queue',
+          queueOptions: { durable: true },
+        },
+      },
     ]),
   ],
   controllers: [BookingController],

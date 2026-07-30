@@ -5,10 +5,12 @@ import {
   RefreshRequestSchema,
   RegisterRequestSchema,
   ValidateTokenRequestSchema,
+  WsTokenRequestSchema,
   type LoginRequest,
   type RefreshRequest,
   type RegisterRequest,
   type ValidateTokenRequest,
+  type WsTokenRequest,
 } from '@bus-booking/shared-types';
 import { ZodValidationPipe } from '@bus-booking/shared-types/nest';
 import {
@@ -16,6 +18,7 @@ import {
   AUTH_REFRESH,
   AUTH_REGISTER,
   AUTH_VALIDATE_TOKEN,
+  AUTH_WS_TOKEN,
 } from '@bus-booking/shared-events';
 import { AuthService } from './auth.service';
 
@@ -49,5 +52,12 @@ export class AuthController {
     dto: ValidateTokenRequest,
   ) {
     return this.authService.validateToken(dto);
+  }
+
+  @MessagePattern(AUTH_WS_TOKEN)
+  wsToken(
+    @Payload(new ZodValidationPipe(WsTokenRequestSchema)) dto: WsTokenRequest,
+  ) {
+    return this.authService.wsToken(dto.userId);
   }
 }

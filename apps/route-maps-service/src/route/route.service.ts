@@ -3,6 +3,8 @@ import type {
   CreateLocationRequest,
   CreateRouteRequest,
   GetOsmPathRequest,
+  ListLocationsRequest,
+  ListRoutesRequest,
   OsmPathResponse,
 } from '@bus-booking/shared-types';
 import { DomainException } from '../common/exceptions/domain.exception';
@@ -14,6 +16,26 @@ export class RouteService {
 
   createLocation(dto: CreateLocationRequest) {
     return this.repo.createLocation(dto);
+  }
+
+  listLocations(dto: ListLocationsRequest) {
+    const page = dto.page ?? 1;
+    const limit = dto.limit ?? 100;
+    return this.repo.listLocations({
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+  }
+
+  listRoutes(dto: ListRoutesRequest) {
+    const page = dto.page ?? 1;
+    const limit = dto.limit ?? 100;
+    return this.repo.listRoutes({
+      originLocationId: dto.originLocationId,
+      destinationLocationId: dto.destinationLocationId,
+      skip: (page - 1) * limit,
+      take: limit,
+    });
   }
 
   async createRoute(dto: CreateRouteRequest) {

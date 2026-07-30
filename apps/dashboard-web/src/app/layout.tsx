@@ -3,8 +3,9 @@ import { ClientProviders } from '../providers/client-providers';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Bus Booking Dashboard',
-  description: 'Staff dashboard for the bus booking system',
+  title: 'Staff Dashboard · Bus Booking',
+  description:
+    'Manage buses, seat maps, routes, trips, users, cancellations and refunds.',
 };
 
 export default function RootLayout({

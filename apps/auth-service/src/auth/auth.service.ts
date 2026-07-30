@@ -9,9 +9,12 @@ import type {
   RefreshRequest,
   RegisterRequest,
   ValidateTokenRequest,
+  WsTokenResponse,
 } from '@bus-booking/shared-types';
 import { DomainException } from '../common/exceptions/domain.exception';
 import { AuthRepository } from './auth.repository';
+
+const WS_TOKEN_TTL_SECONDS = 300;
 
 @Injectable()
 export class AuthService {
@@ -69,6 +72,17 @@ export class AuthService {
     } catch {
       return { valid: false };
     }
+  }
+
+  /**
+   * Scoped to `purpose: 'ws'` so a leaked socket token cannot be replayed
+   * against the REST API.
+   */
+  wsToken(userId: string): WsTokenResponse {
+    const secret = process.env.JWT_SECRET ?? 'dev-secret-change-me';
+    const expiresIn = WS_TOKEN_TTL_SECONDS;
+    const token = signJwt({ sub: userId, purpose: 'ws' }, secret, expiresIn);
+    return { token, expiresIn };
   }
 
   private async issueTokens(

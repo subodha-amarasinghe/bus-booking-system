@@ -11,6 +11,9 @@ export function QueryProvider({ children }: { children: ReactNode }) {
           queries: {
             staleTime: 30_000,
             refetchOnWindowFocus: false,
+            // Gateway errors are actionable messages, not blips — show them
+            // straight away instead of retrying for ten seconds first.
+            retry: false,
           },
         },
       })

@@ -1,4 +1,5 @@
 import {
+  ConnectedSocket,
   MessageBody,
   SubscribeMessage,
   WebSocketGateway,
@@ -21,7 +22,10 @@ export class SeatGateway {
   server!: Server;
 
   @SubscribeMessage(SEAT_SOCKET_JOIN_TRIP)
-  handleJoinTrip(client: Socket, @MessageBody() data: { tripId: string }): void {
+  handleJoinTrip(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { tripId: string },
+  ): void {
     const room = `trip:${data.tripId}`;
     void client.join(room);
   }

@@ -23,6 +23,12 @@ export const CreateLocationRequestSchema = z.object({
 });
 export type CreateLocationRequest = z.infer<typeof CreateLocationRequestSchema>;
 
+export const ListLocationsRequestSchema = z.object({
+  page: z.number().int().positive().optional(),
+  limit: z.number().int().positive().optional(),
+});
+export type ListLocationsRequest = z.infer<typeof ListLocationsRequestSchema>;
+
 export const RouteSchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1),
@@ -43,6 +49,14 @@ export const CreateRouteRequestSchema = z.object({
   estimatedDurationMin: z.number().int().nonnegative().optional(),
 });
 export type CreateRouteRequest = z.infer<typeof CreateRouteRequestSchema>;
+
+export const ListRoutesRequestSchema = z.object({
+  originLocationId: z.string().uuid().optional(),
+  destinationLocationId: z.string().uuid().optional(),
+  page: z.number().int().positive().optional(),
+  limit: z.number().int().positive().optional(),
+});
+export type ListRoutesRequest = z.infer<typeof ListRoutesRequestSchema>;
 
 export const GetOsmPathRequestSchema = z.object({
   originLat: z.number(),

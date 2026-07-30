@@ -21,6 +21,31 @@ export class RouteRepository {
     return this.prisma.location.findUnique({ where: { id } });
   }
 
+  listLocations(filter: { skip?: number; take?: number }): Promise<Location[]> {
+    return this.prisma.location.findMany({
+      orderBy: { name: 'asc' },
+      skip: filter.skip,
+      take: filter.take,
+    });
+  }
+
+  listRoutes(filter: {
+    originLocationId?: string;
+    destinationLocationId?: string;
+    skip?: number;
+    take?: number;
+  }): Promise<Route[]> {
+    return this.prisma.route.findMany({
+      where: {
+        originLocationId: filter.originLocationId,
+        destinationLocationId: filter.destinationLocationId,
+      },
+      orderBy: { name: 'asc' },
+      skip: filter.skip,
+      take: filter.take,
+    });
+  }
+
   createRoute(data: {
     name: string;
     originLocationId: string;

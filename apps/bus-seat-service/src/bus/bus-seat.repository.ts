@@ -52,6 +52,14 @@ export class BusSeatRepository {
     });
   }
 
+  findLayoutByBusId(busId: string): Promise<SeatLayout | null> {
+    return this.prisma.seatLayout.findUnique({ where: { busId } });
+  }
+
+  findTripById(id: string): Promise<Trip | null> {
+    return this.prisma.trip.findUnique({ where: { id } });
+  }
+
   createTrip(data: {
     busId: string;
     routeId: string;
@@ -66,20 +74,37 @@ export class BusSeatRepository {
 
   searchTrips(filter: {
     routeId?: string;
+    routeIds?: string[];
     departureDate?: Date;
     minFare?: number;
     maxFare?: number;
     skip?: number;
     take?: number;
   }): Promise<Trip[]> {
-    return this.prisma.trip.findMany({
-      where: {
-        routeId: filter.routeId,
-        fareAmount: {
-          gte: filter.minFare,
-          lte: filter.maxFare,
-        },
+    const where: Prisma.TripWhereInput = {
+      fareAmount: {
+        gte: filter.minFare,
+        lte: filter.maxFare,
       },
+    };
+
+    if (filter.routeId) {
+      where.routeId = filter.routeId;
+    } else if (filter.routeIds) {
+      where.routeId = { in: filter.routeIds };
+    }
+
+    if (filter.departureDate) {
+      const dayStart = new Date(filter.departureDate);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(dayStart);
+      dayEnd.setDate(dayEnd.getDate() + 1);
+      where.departureAt = { gte: dayStart, lt: dayEnd };
+    }
+
+    return this.prisma.trip.findMany({
+      where,
+      orderBy: { departureAt: 'asc' },
       skip: filter.skip,
       take: filter.take,
     });

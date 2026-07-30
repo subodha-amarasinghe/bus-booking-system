@@ -1,46 +1,53 @@
-'use client';
-
-import { zodResolver } from '@hookform/resolvers/zod';
-import { LoginRequestSchema, type LoginRequest } from '@bus-booking/shared-types';
+import { ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { LoginForm } from '../../../features/auth/login-form';
+import { safeInternalPath } from '../../../lib/format';
 
-export default function LoginPage() {
-  const router = useRouter();
-  const [error, setError] = useState('');
-  const { register, handleSubmit, formState } = useForm<LoginRequest>({
-    resolver: zodResolver(LoginRequestSchema),
-  });
+export const metadata = { title: 'Sign in · Bus Booking' };
 
-  async function submit(values: LoginRequest) {
-    setError('');
-    const response = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(values),
-    });
-    const body = await response.json().catch(() => ({}));
-    if (!response.ok) return setError(body.message ?? 'Login failed');
-    router.replace('/bookings');
-    router.refresh();
-  }
+export default function LoginPage({
+  searchParams,
+}: {
+  searchParams: { next?: string };
+}) {
+  const next = safeInternalPath(searchParams.next, '/');
 
   return (
-    <main>
-      <section className="card auth-card">
-        <h1>Passenger login</h1>
-        <form onSubmit={handleSubmit(submit)}>
-          <label>Phone<input autoComplete="username" {...register('phone')} /></label>
-          <label>Password<input type="password" autoComplete="current-password" {...register('password')} /></label>
-          {error && <p className="error">{error}</p>}
-          <button disabled={formState.isSubmitting}>
-            {formState.isSubmitting ? 'Signing in…' : 'Sign in'}
-          </button>
-        </form>
-        <p className="muted">New passenger? <Link href="/register">Create an account</Link>.</p>
+    <div className="mx-auto w-full max-w-md space-y-4">
+      <section className="ui-card space-y-5">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+            Welcome back
+          </h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Sign in to hold seats and manage your trips.
+          </p>
+        </div>
+
+        <LoginForm next={next} />
+
+        <p className="text-sm text-slate-500">
+          New here?{' '}
+          <Link
+            className="font-semibold text-brand-700 hover:underline"
+            href={`/register?next=${encodeURIComponent(next)}`}
+          >
+            Create an account
+          </Link>
+          .
+        </p>
       </section>
-    </main>
+
+      <aside className="rounded-2xl border border-brand-100 bg-brand-50 p-4 text-sm text-brand-900">
+        <p className="flex items-center gap-2 font-semibold">
+          <ShieldCheck aria-hidden="true" className="h-4 w-4" />
+          Demo passenger
+        </p>
+        <p className="mt-1 font-mono text-xs">0771111111 · Password123!</p>
+        <p className="mt-1 text-xs text-brand-800">
+          Seeded by <code className="font-mono">pnpm db:seed</code>.
+        </p>
+      </aside>
+    </div>
   );
 }

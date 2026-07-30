@@ -63,6 +63,13 @@ export const SaveSeatLayoutRequestSchema = z.object({
 });
 export type SaveSeatLayoutRequest = z.infer<typeof SaveSeatLayoutRequestSchema>;
 
+export const GetSeatLayoutByBusRequestSchema = z.object({
+  busId: z.string().uuid(),
+});
+export type GetSeatLayoutByBusRequest = z.infer<
+  typeof GetSeatLayoutByBusRequestSchema
+>;
+
 export const TripSchema = z.object({
   id: z.string().uuid(),
   busId: z.string().uuid(),
@@ -88,10 +95,21 @@ export const CreateTripRequestSchema = z.object({
 });
 export type CreateTripRequest = z.infer<typeof CreateTripRequestSchema>;
 
+export const GetTripRequestSchema = z.object({
+  tripId: z.string().uuid(),
+});
+export type GetTripRequest = z.infer<typeof GetTripRequestSchema>;
+
 export const SearchTripsRequestSchema = z.object({
   originLocationId: z.string().uuid().optional(),
   destinationLocationId: z.string().uuid().optional(),
   routeId: z.string().uuid().optional(),
+  /**
+   * Routes live in route-maps-service, so bus-seat-service cannot join on
+   * origin/destination itself. The gateway resolves those into route ids and
+   * passes them here.
+   */
+  routeIds: z.array(z.string().uuid()).optional(),
   departureDate: z.coerce.date().optional(),
   minFare: z.number().nonnegative().optional(),
   maxFare: z.number().nonnegative().optional(),

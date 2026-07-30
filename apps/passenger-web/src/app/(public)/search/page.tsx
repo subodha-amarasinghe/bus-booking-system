@@ -1,14 +1,36 @@
-import { SearchTripsRequestSchema, TripSchema, type Trip } from '@bus-booking/shared-types';
+import {
+  SearchTripsRequestSchema,
+  TripSchema,
+  type Trip,
+} from '@bus-booking/shared-types';
+import { ArrowRight, Armchair, Bus, CalendarDays, Clock } from 'lucide-react';
 import Link from 'next/link';
+import { TripSearchForm } from '../../../features/search/trip-search-form';
+import {
+  formatDate,
+  formatDuration,
+  formatMoney,
+  formatTime,
+  shiftDateInputValue,
+  toDateInputValue,
+} from '../../../lib/format';
+import { getLocations, getRouteLabels, type RouteLabel } from '../../../lib/locations';
 import { API_GATEWAY_URL } from '../../../lib/route-proxy';
+import { EmptyState } from '../../../shared/components/EmptyState';
+import { PageHeader } from '../../../shared/components/PageHeader';
+import { StatusBadge } from '../../../shared/components/StatusBadge';
 
 type Params = Record<string, string | string[] | undefined>;
 
+function first(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value || undefined;
+}
+
 async function searchTrips(searchParams: Params): Promise<Trip[]> {
   const parsed = SearchTripsRequestSchema.safeParse({
-    originLocationId: searchParams.originLocationId || undefined,
-    destinationLocationId: searchParams.destinationLocationId || undefined,
-    departureDate: searchParams.departureDate || undefined,
+    originLocationId: first(searchParams.originLocationId),
+    destinationLocationId: first(searchParams.destinationLocationId),
+    departureDate: first(searchParams.departureDate),
     page: 1,
     limit: 30,
   });
@@ -21,12 +43,99 @@ async function searchTrips(searchParams: Params): Promise<Trip[]> {
       body: JSON.stringify(parsed.data),
       cache: 'no-store',
     });
-    const body = await response.json();
-    const trips = Array.isArray(body) ? body : body.items;
+    if (!response.ok) return [];
+    const body = await response.json().catch(() => []);
+    const trips = Array.isArray(body) ? body : body?.items;
     return TripSchema.array().safeParse(trips).data ?? [];
   } catch {
     return [];
   }
+}
+
+function TripCard({
+  trip,
+  route,
+}: {
+  trip: Trip;
+  route?: RouteLabel;
+}) {
+  const duration = formatDuration(trip.departureAt, trip.arrivalAt);
+  const seatsLeft = trip.availableSeats;
+  const soldOut = seatsLeft === 0;
+
+  return (
+    <li className="ui-card">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+            {formatDate(trip.departureAt)}
+          </p>
+          <p className="mt-1 flex items-baseline gap-2">
+            <span className="text-2xl font-bold tracking-tight text-slate-900">
+              {formatTime(trip.departureAt)}
+            </span>
+            {trip.arrivalAt && (
+              <>
+                <ArrowRight aria-hidden="true" className="h-4 w-4 text-slate-400" />
+                <span className="text-lg font-semibold text-slate-700">
+                  {formatTime(trip.arrivalAt)}
+                </span>
+              </>
+            )}
+          </p>
+          <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-slate-600">
+            <Bus aria-hidden="true" className="h-4 w-4 text-brand-600" />
+            {route?.origin && route.destination
+              ? `${route.origin} → ${route.destination}`
+              : route?.name ?? 'Intercity service'}
+          </p>
+        </div>
+
+        <div className="text-right">
+          <p className="text-xl font-bold text-slate-900">
+            {formatMoney(trip.fareAmount, trip.currency)}
+          </p>
+          <p className="text-xs text-slate-500">per seat</p>
+          <StatusBadge className="mt-2" status={trip.status} />
+        </div>
+      </div>
+
+      <dl className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-slate-600">
+        <div className="flex items-center gap-1.5">
+          <Armchair aria-hidden="true" className="h-4 w-4 text-slate-400" />
+          <dt className="sr-only">Seats available</dt>
+          <dd>
+            {seatsLeft === undefined
+              ? 'Seats shown on the map'
+              : `${seatsLeft} seat${seatsLeft === 1 ? '' : 's'} available`}
+          </dd>
+        </div>
+        {duration && (
+          <div className="flex items-center gap-1.5">
+            <Clock aria-hidden="true" className="h-4 w-4 text-slate-400" />
+            <dt className="sr-only">Journey time</dt>
+            <dd>{duration}</dd>
+          </div>
+        )}
+      </dl>
+
+      {soldOut ? (
+        <p className="mt-4 text-sm font-medium text-slate-500">
+          This departure is fully booked.
+        </p>
+      ) : (
+        <Link
+          className="ui-btn-primary mt-4 min-h-[48px] w-full sm:w-auto"
+          href={`/trips/${trip.id}?fare=${trip.fareAmount}&currency=${trip.currency}&departureAt=${encodeURIComponent(
+            new Date(trip.departureAt).toISOString(),
+          )}`}
+        >
+          Select seats
+          <ArrowRight aria-hidden="true" className="h-4 w-4" />
+        </Link>
+      )}
+    </li>
+  );
 }
 
 export default async function SearchPage({
@@ -34,28 +143,108 @@ export default async function SearchPage({
 }: {
   searchParams: Params;
 }) {
-  const trips = await searchTrips(searchParams);
+  const originLocationId = first(searchParams.originLocationId);
+  const destinationLocationId = first(searchParams.destinationLocationId);
+  const departureDate = first(searchParams.departureDate);
+  const hasQuery = Boolean(originLocationId && destinationLocationId);
+
+  const [locations, routeLabels, trips] = await Promise.all([
+    getLocations(),
+    getRouteLabels(),
+    hasQuery ? searchTrips(searchParams) : Promise.resolve<Trip[]>([]),
+  ]);
+
+  const byId = new Map(locations.map((location) => [location.id, location.name]));
+  const journey =
+    originLocationId && destinationLocationId
+      ? `${byId.get(originLocationId) ?? 'Origin'} → ${byId.get(destinationLocationId) ?? 'Destination'}`
+      : undefined;
+
+  const baseDate = departureDate ?? toDateInputValue();
+  const nearbyDates = hasQuery
+    ? [-1, 1].map((offset) => {
+        const date = shiftDateInputValue(baseDate, offset);
+        return {
+          date,
+          href: `/search?originLocationId=${originLocationId}&destinationLocationId=${destinationLocationId}&departureDate=${date}`,
+        };
+      })
+    : [];
+
   return (
-    <main className="stack">
-      <div>
-        <h1>Available trips</h1>
-        <p className="muted">Live availability is confirmed on the seat map.</p>
-      </div>
-      <div className="grid trip-grid">
-        {trips.map((trip) => (
-          <article className="card stack" key={trip.id}>
-            <strong>{new Date(trip.departureAt).toLocaleString()}</strong>
-            <span>{trip.availableSeats ?? '—'} seats available</span>
-            <span>{trip.currency} {trip.fareAmount.toFixed(2)}</span>
-            <Link className="button" href={`/trips/${trip.id}`}>Choose seats</Link>
-          </article>
-        ))}
-        {!trips.length && (
-          <div className="card">
-            <p>No matching trips were returned. Check the search details or try again.</p>
-          </div>
-        )}
-      </div>
-    </main>
+    <div className="space-y-6">
+      <PageHeader
+        backHref="/"
+        backLabel="Home"
+        subtitle={
+          journey
+            ? `${journey}${departureDate ? ` · ${formatDate(departureDate)}` : ''}`
+            : 'Pick an origin and destination to see departures.'
+        }
+        title="Available buses"
+      />
+
+      <section aria-labelledby="refine-heading" className="ui-card">
+        <h2
+          className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-500"
+          id="refine-heading"
+        >
+          Refine your search
+        </h2>
+        <TripSearchForm
+          defaults={{ originLocationId, destinationLocationId, departureDate }}
+          locations={locations}
+          submitLabel="Update results"
+        />
+      </section>
+
+      {!hasQuery ? (
+        <EmptyState
+          description="Choose where you are travelling from and to, then search to see live departures."
+          icon={Bus}
+          title="Start with your route"
+        />
+      ) : trips.length === 0 ? (
+        <EmptyState
+          action={
+            nearbyDates.length > 0 ? (
+              <div className="flex flex-wrap justify-center gap-2">
+                {nearbyDates.map((option) => (
+                  <Link
+                    className="ui-btn-secondary min-h-[44px]"
+                    href={option.href}
+                    key={option.date}
+                  >
+                    <CalendarDays aria-hidden="true" className="h-4 w-4" />
+                    {formatDate(option.date)}
+                  </Link>
+                ))}
+              </div>
+            ) : undefined
+          }
+          description="No departures matched this route and date. Try a different date."
+          icon={CalendarDays}
+          title="Nothing scheduled yet"
+        />
+      ) : (
+        <section aria-labelledby="results-heading">
+          <h2
+            className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500"
+            id="results-heading"
+          >
+            {trips.length} departure{trips.length === 1 ? '' : 's'}
+          </h2>
+          <ul className="space-y-4">
+            {trips.map((trip) => (
+              <TripCard
+                key={trip.id}
+                route={routeLabels[trip.routeId]}
+                trip={trip}
+              />
+            ))}
+          </ul>
+        </section>
+      )}
+    </div>
   );
 }

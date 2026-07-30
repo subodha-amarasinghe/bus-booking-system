@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import type {
   CreateBusRequest,
   CreateTripRequest,
+  GetSeatLayoutByBusRequest,
+  GetTripRequest,
   ListBusesRequest,
   SaveSeatLayoutRequest,
   SearchTripsRequest,
@@ -52,11 +54,25 @@ export class BusSeatService {
     });
   }
 
+  getLayoutByBus(dto: GetSeatLayoutByBusRequest) {
+    return this.repo.findLayoutByBusId(dto.busId);
+  }
+
+  getTrip(dto: GetTripRequest) {
+    return this.repo.findTripById(dto.tripId);
+  }
+
+  /**
+   * `originLocationId`/`destinationLocationId` cannot be honoured here because
+   * routes live in route-maps-service's database; the gateway resolves them to
+   * `routeIds` before calling in.
+   */
   searchTrips(dto: SearchTripsRequest) {
     const page = dto.page ?? 1;
     const limit = dto.limit ?? 20;
     return this.repo.searchTrips({
       routeId: dto.routeId,
+      routeIds: dto.routeIds,
       departureDate: dto.departureDate,
       minFare: dto.minFare,
       maxFare: dto.maxFare,

@@ -10,6 +10,22 @@ export class BookingRepository {
     return this.prisma.booking.findUnique({ where: { idempotencyKey: key } });
   }
 
+  findByUserId(userId: string): Promise<Booking[]> {
+    return this.prisma.booking.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  findConfirmedOrLockedByTrip(tripId: string): Promise<Booking[]> {
+    return this.prisma.booking.findMany({
+      where: {
+        tripId,
+        status: { in: ['LOCKED', 'CONFIRMED'] },
+      },
+    });
+  }
+
   findActiveSeat(tripId: string, seatNo: string): Promise<Booking | null> {
     return this.prisma.booking.findFirst({
       where: {

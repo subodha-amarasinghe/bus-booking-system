@@ -137,5 +137,15 @@ export type ReleaseSeatsResponse = z.infer<
   typeof ReleaseSeatsResponseSchema
 >;
 
+export const MyBookingsRequestSchema = z.object({
+  userId: z.string().uuid(),
+});
+export type MyBookingsRequest = z.infer<typeof MyBookingsRequestSchema>;
+
 export const MyBookingsResponseSchema = z.array(BookingSchema);
 export type MyBookingsResponse = z.infer<typeof MyBookingsResponseSchema>;
+
+export const GetSeatMapRequestSchema = z.object({
+  tripId: z.string().uuid(),
+});
+export type GetSeatMapRequest = z.infer<typeof GetSeatMapRequestSchema>;

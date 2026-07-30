@@ -1,4 +1,4 @@
-import { Body, Controller, Inject, Post } from '@nestjs/common';
+import { Body, Controller, Inject, Post, Req, UseGuards } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import {
   LoginRequestSchema,
@@ -9,6 +9,7 @@ import {
   type RefreshRequest,
   type RegisterRequest,
   type ValidateTokenRequest,
+  type WsTokenResponse,
 } from '@bus-booking/shared-types';
 import { ZodValidationPipe } from '@bus-booking/shared-types/nest';
 import {
@@ -16,8 +17,11 @@ import {
   AUTH_REFRESH,
   AUTH_REGISTER,
   AUTH_VALIDATE_TOKEN,
+  AUTH_WS_TOKEN,
 } from '@bus-booking/shared-events';
 import { firstValueFrom } from 'rxjs';
+import type { AuthenticatedRequest } from './authenticated-request';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -48,5 +52,15 @@ export class AuthController {
     dto: ValidateTokenRequest,
   ) {
     return firstValueFrom(this.client.send(AUTH_VALIDATE_TOKEN, dto));
+  }
+
+  @Post('ws-token')
+  @UseGuards(JwtAuthGuard)
+  wsToken(@Req() req: AuthenticatedRequest) {
+    return firstValueFrom(
+      this.client.send<WsTokenResponse>(AUTH_WS_TOKEN, {
+        userId: req.user.userId,
+      }),
+    );
   }
 }
