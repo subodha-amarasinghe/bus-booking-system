@@ -5,17 +5,20 @@ import {
   LockSeatResponseSchema,
   LockSeatsRequestSchema,
   LockSeatsResponseSchema,
+  ListRoutesRequestSchema,
   MyBookingsResponseSchema,
   ReleaseSeatsRequestSchema,
   ReleaseSeatsResponseSchema,
   SearchTripsRequestSchema,
   SeatMapResponseSchema,
+  RouteSchema,
   TripSchema,
   type Booking,
   type ConfirmBookingRequest,
   type ConfirmBookingResponse,
   type LockSeatsRequest,
   type LockSeatsResponse,
+  type Route,
   type MyBookingsResponse,
   type ReleaseSeatsRequest,
   type ReleaseSeatsResponse,
@@ -49,6 +52,7 @@ export interface PassengerApiPaths {
   readonly lockSeat: string;
   readonly releaseSeats: string;
   readonly confirmBooking: string;
+  readonly routeList: string;
 }
 
 export interface CreatePassengerApiOptions {
@@ -65,6 +69,7 @@ export interface PassengerApi {
   lockSeats(input: LockSeatsRequest): Promise<LockSeatsResponse>;
   releaseSeats(input: ReleaseSeatsRequest): Promise<ReleaseSeatsResponse>;
   confirmBooking(input: ConfirmBookingRequest): Promise<ConfirmBookingResponse>;
+  getRoute(routeId: string): Promise<Route | null>;
 }
 
 export class PassengerApiError extends Error {
@@ -85,9 +90,11 @@ const DEFAULT_PATHS: PassengerApiPaths = {
   lockSeat: '/bookings/lock-seat',
   releaseSeats: '/bookings/release-seat',
   confirmBooking: '/bookings/confirm',
+  routeList: '/routes/list',
 };
 
 const TripsResponseSchema = z.array(TripSchema);
+const RoutesResponseSchema = z.array(RouteSchema);
 
 export function createPassengerApi(
   options: CreatePassengerApiOptions,
@@ -138,6 +145,17 @@ export function createPassengerApi(
 
     async getMyBookings() {
       return request(paths.myBookings, MyBookingsResponseSchema, 'GET');
+    },
+
+    async getRoute(routeId) {
+      const payload = ListRoutesRequestSchema.parse({ limit: 100 });
+      const routes = await request(
+        paths.routeList,
+        RoutesResponseSchema,
+        'POST',
+        payload,
+      );
+      return routes.find((route) => route.id === routeId) ?? null;
     },
 
     async lockSeats(input) {
@@ -193,6 +211,7 @@ export type {
   MyBookingsResponse,
   ReleaseSeatsRequest,
   ReleaseSeatsResponse,
+  Route,
   SearchTripsRequest,
   SeatMapResponse,
   Trip,

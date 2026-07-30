@@ -20,6 +20,7 @@ const LocationOptionSchema = LocationSchema.pick({
 const RouteOptionSchema = RouteSchema.pick({
   id: true,
   name: true,
+  routeNumber: true,
   originLocationId: true,
   destinationLocationId: true,
   estimatedDurationMin: true,
@@ -28,7 +29,12 @@ const RouteOptionSchema = RouteSchema.pick({
 export type LocationOption = Pick<Location, 'id' | 'name' | 'code' | 'city'>;
 export type RouteOption = Pick<
   Route,
-  'id' | 'name' | 'originLocationId' | 'destinationLocationId' | 'estimatedDurationMin'
+  | 'id'
+  | 'name'
+  | 'routeNumber'
+  | 'originLocationId'
+  | 'destinationLocationId'
+  | 'estimatedDurationMin'
 >;
 
 async function postPublic(path: string, body: unknown): Promise<unknown> {
@@ -73,6 +79,7 @@ export async function getRoutes(): Promise<RouteOption[]> {
 
 export interface RouteLabel {
   readonly name: string;
+  readonly routeNumber?: string | null;
   readonly origin?: string;
   readonly destination?: string;
   readonly estimatedDurationMin?: number;
@@ -91,6 +98,7 @@ export async function getRouteLabels(): Promise<Record<string, RouteLabel>> {
       route.id,
       {
         name: route.name,
+        routeNumber: route.routeNumber,
         origin: names.get(route.originLocationId),
         destination: names.get(route.destinationLocationId),
         estimatedDurationMin: route.estimatedDurationMin,

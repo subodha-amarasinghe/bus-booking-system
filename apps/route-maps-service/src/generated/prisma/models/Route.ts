@@ -39,6 +39,7 @@ export type RouteSumAggregateOutputType = {
 export type RouteMinAggregateOutputType = {
   id: string | null
   name: string | null
+  routeNumber: string | null
   originLocationId: string | null
   destinationLocationId: string | null
   distanceKm: number | null
@@ -50,6 +51,7 @@ export type RouteMinAggregateOutputType = {
 export type RouteMaxAggregateOutputType = {
   id: string | null
   name: string | null
+  routeNumber: string | null
   originLocationId: string | null
   destinationLocationId: string | null
   distanceKm: number | null
@@ -61,10 +63,12 @@ export type RouteMaxAggregateOutputType = {
 export type RouteCountAggregateOutputType = {
   id: number
   name: number
+  routeNumber: number
   originLocationId: number
   destinationLocationId: number
   distanceKm: number
   estimatedDurationMin: number
+  pathCoordinates: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -84,6 +88,7 @@ export type RouteSumAggregateInputType = {
 export type RouteMinAggregateInputType = {
   id?: true
   name?: true
+  routeNumber?: true
   originLocationId?: true
   destinationLocationId?: true
   distanceKm?: true
@@ -95,6 +100,7 @@ export type RouteMinAggregateInputType = {
 export type RouteMaxAggregateInputType = {
   id?: true
   name?: true
+  routeNumber?: true
   originLocationId?: true
   destinationLocationId?: true
   distanceKm?: true
@@ -106,10 +112,12 @@ export type RouteMaxAggregateInputType = {
 export type RouteCountAggregateInputType = {
   id?: true
   name?: true
+  routeNumber?: true
   originLocationId?: true
   destinationLocationId?: true
   distanceKm?: true
   estimatedDurationMin?: true
+  pathCoordinates?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -204,10 +212,12 @@ export type RouteGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
 export type RouteGroupByOutputType = {
   id: string
   name: string
+  routeNumber: string | null
   originLocationId: string
   destinationLocationId: string
   distanceKm: number | null
   estimatedDurationMin: number | null
+  pathCoordinates: runtime.JsonValue | null
   createdAt: Date
   updatedAt: Date
   _count: RouteCountAggregateOutputType | null
@@ -238,10 +248,12 @@ export type RouteWhereInput = {
   NOT?: Prisma.RouteWhereInput | Prisma.RouteWhereInput[]
   id?: Prisma.StringFilter<"Route"> | string
   name?: Prisma.StringFilter<"Route"> | string
+  routeNumber?: Prisma.StringNullableFilter<"Route"> | string | null
   originLocationId?: Prisma.StringFilter<"Route"> | string
   destinationLocationId?: Prisma.StringFilter<"Route"> | string
   distanceKm?: Prisma.FloatNullableFilter<"Route"> | number | null
   estimatedDurationMin?: Prisma.IntNullableFilter<"Route"> | number | null
+  pathCoordinates?: Prisma.JsonNullableFilter<"Route">
   createdAt?: Prisma.DateTimeFilter<"Route"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Route"> | Date | string
   origin?: Prisma.XOR<Prisma.LocationScalarRelationFilter, Prisma.LocationWhereInput>
@@ -251,10 +263,12 @@ export type RouteWhereInput = {
 export type RouteOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  routeNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   originLocationId?: Prisma.SortOrder
   destinationLocationId?: Prisma.SortOrder
   distanceKm?: Prisma.SortOrderInput | Prisma.SortOrder
   estimatedDurationMin?: Prisma.SortOrderInput | Prisma.SortOrder
+  pathCoordinates?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   origin?: Prisma.LocationOrderByWithRelationInput
@@ -267,10 +281,12 @@ export type RouteWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.RouteWhereInput[]
   NOT?: Prisma.RouteWhereInput | Prisma.RouteWhereInput[]
   name?: Prisma.StringFilter<"Route"> | string
+  routeNumber?: Prisma.StringNullableFilter<"Route"> | string | null
   originLocationId?: Prisma.StringFilter<"Route"> | string
   destinationLocationId?: Prisma.StringFilter<"Route"> | string
   distanceKm?: Prisma.FloatNullableFilter<"Route"> | number | null
   estimatedDurationMin?: Prisma.IntNullableFilter<"Route"> | number | null
+  pathCoordinates?: Prisma.JsonNullableFilter<"Route">
   createdAt?: Prisma.DateTimeFilter<"Route"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Route"> | Date | string
   origin?: Prisma.XOR<Prisma.LocationScalarRelationFilter, Prisma.LocationWhereInput>
@@ -280,10 +296,12 @@ export type RouteWhereUniqueInput = Prisma.AtLeast<{
 export type RouteOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  routeNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   originLocationId?: Prisma.SortOrder
   destinationLocationId?: Prisma.SortOrder
   distanceKm?: Prisma.SortOrderInput | Prisma.SortOrder
   estimatedDurationMin?: Prisma.SortOrderInput | Prisma.SortOrder
+  pathCoordinates?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.RouteCountOrderByAggregateInput
@@ -299,10 +317,12 @@ export type RouteScalarWhereWithAggregatesInput = {
   NOT?: Prisma.RouteScalarWhereWithAggregatesInput | Prisma.RouteScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Route"> | string
   name?: Prisma.StringWithAggregatesFilter<"Route"> | string
+  routeNumber?: Prisma.StringNullableWithAggregatesFilter<"Route"> | string | null
   originLocationId?: Prisma.StringWithAggregatesFilter<"Route"> | string
   destinationLocationId?: Prisma.StringWithAggregatesFilter<"Route"> | string
   distanceKm?: Prisma.FloatNullableWithAggregatesFilter<"Route"> | number | null
   estimatedDurationMin?: Prisma.IntNullableWithAggregatesFilter<"Route"> | number | null
+  pathCoordinates?: Prisma.JsonNullableWithAggregatesFilter<"Route">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Route"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Route"> | Date | string
 }
@@ -310,8 +330,10 @@ export type RouteScalarWhereWithAggregatesInput = {
 export type RouteCreateInput = {
   id?: string
   name: string
+  routeNumber?: string | null
   distanceKm?: number | null
   estimatedDurationMin?: number | null
+  pathCoordinates?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   origin: Prisma.LocationCreateNestedOneWithoutOriginsInput
@@ -321,10 +343,12 @@ export type RouteCreateInput = {
 export type RouteUncheckedCreateInput = {
   id?: string
   name: string
+  routeNumber?: string | null
   originLocationId: string
   destinationLocationId: string
   distanceKm?: number | null
   estimatedDurationMin?: number | null
+  pathCoordinates?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -332,8 +356,10 @@ export type RouteUncheckedCreateInput = {
 export type RouteUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  routeNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   distanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   estimatedDurationMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  pathCoordinates?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   origin?: Prisma.LocationUpdateOneRequiredWithoutOriginsNestedInput
@@ -343,10 +369,12 @@ export type RouteUpdateInput = {
 export type RouteUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  routeNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originLocationId?: Prisma.StringFieldUpdateOperationsInput | string
   destinationLocationId?: Prisma.StringFieldUpdateOperationsInput | string
   distanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   estimatedDurationMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  pathCoordinates?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -354,10 +382,12 @@ export type RouteUncheckedUpdateInput = {
 export type RouteCreateManyInput = {
   id?: string
   name: string
+  routeNumber?: string | null
   originLocationId: string
   destinationLocationId: string
   distanceKm?: number | null
   estimatedDurationMin?: number | null
+  pathCoordinates?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -365,8 +395,10 @@ export type RouteCreateManyInput = {
 export type RouteUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  routeNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   distanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   estimatedDurationMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  pathCoordinates?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -374,10 +406,12 @@ export type RouteUpdateManyMutationInput = {
 export type RouteUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  routeNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originLocationId?: Prisma.StringFieldUpdateOperationsInput | string
   destinationLocationId?: Prisma.StringFieldUpdateOperationsInput | string
   distanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   estimatedDurationMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  pathCoordinates?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -395,10 +429,12 @@ export type RouteOrderByRelationAggregateInput = {
 export type RouteCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  routeNumber?: Prisma.SortOrder
   originLocationId?: Prisma.SortOrder
   destinationLocationId?: Prisma.SortOrder
   distanceKm?: Prisma.SortOrder
   estimatedDurationMin?: Prisma.SortOrder
+  pathCoordinates?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -411,6 +447,7 @@ export type RouteAvgOrderByAggregateInput = {
 export type RouteMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  routeNumber?: Prisma.SortOrder
   originLocationId?: Prisma.SortOrder
   destinationLocationId?: Prisma.SortOrder
   distanceKm?: Prisma.SortOrder
@@ -422,6 +459,7 @@ export type RouteMaxOrderByAggregateInput = {
 export type RouteMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  routeNumber?: Prisma.SortOrder
   originLocationId?: Prisma.SortOrder
   destinationLocationId?: Prisma.SortOrder
   distanceKm?: Prisma.SortOrder
@@ -538,8 +576,10 @@ export type NullableIntFieldUpdateOperationsInput = {
 export type RouteCreateWithoutOriginInput = {
   id?: string
   name: string
+  routeNumber?: string | null
   distanceKm?: number | null
   estimatedDurationMin?: number | null
+  pathCoordinates?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   destination: Prisma.LocationCreateNestedOneWithoutDestinationsInput
@@ -548,9 +588,11 @@ export type RouteCreateWithoutOriginInput = {
 export type RouteUncheckedCreateWithoutOriginInput = {
   id?: string
   name: string
+  routeNumber?: string | null
   destinationLocationId: string
   distanceKm?: number | null
   estimatedDurationMin?: number | null
+  pathCoordinates?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -568,8 +610,10 @@ export type RouteCreateManyOriginInputEnvelope = {
 export type RouteCreateWithoutDestinationInput = {
   id?: string
   name: string
+  routeNumber?: string | null
   distanceKm?: number | null
   estimatedDurationMin?: number | null
+  pathCoordinates?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   origin: Prisma.LocationCreateNestedOneWithoutOriginsInput
@@ -578,9 +622,11 @@ export type RouteCreateWithoutDestinationInput = {
 export type RouteUncheckedCreateWithoutDestinationInput = {
   id?: string
   name: string
+  routeNumber?: string | null
   originLocationId: string
   distanceKm?: number | null
   estimatedDurationMin?: number | null
+  pathCoordinates?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -617,10 +663,12 @@ export type RouteScalarWhereInput = {
   NOT?: Prisma.RouteScalarWhereInput | Prisma.RouteScalarWhereInput[]
   id?: Prisma.StringFilter<"Route"> | string
   name?: Prisma.StringFilter<"Route"> | string
+  routeNumber?: Prisma.StringNullableFilter<"Route"> | string | null
   originLocationId?: Prisma.StringFilter<"Route"> | string
   destinationLocationId?: Prisma.StringFilter<"Route"> | string
   distanceKm?: Prisma.FloatNullableFilter<"Route"> | number | null
   estimatedDurationMin?: Prisma.IntNullableFilter<"Route"> | number | null
+  pathCoordinates?: Prisma.JsonNullableFilter<"Route">
   createdAt?: Prisma.DateTimeFilter<"Route"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Route"> | Date | string
 }
@@ -644,9 +692,11 @@ export type RouteUpdateManyWithWhereWithoutDestinationInput = {
 export type RouteCreateManyOriginInput = {
   id?: string
   name: string
+  routeNumber?: string | null
   destinationLocationId: string
   distanceKm?: number | null
   estimatedDurationMin?: number | null
+  pathCoordinates?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -654,9 +704,11 @@ export type RouteCreateManyOriginInput = {
 export type RouteCreateManyDestinationInput = {
   id?: string
   name: string
+  routeNumber?: string | null
   originLocationId: string
   distanceKm?: number | null
   estimatedDurationMin?: number | null
+  pathCoordinates?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -664,8 +716,10 @@ export type RouteCreateManyDestinationInput = {
 export type RouteUpdateWithoutOriginInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  routeNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   distanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   estimatedDurationMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  pathCoordinates?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   destination?: Prisma.LocationUpdateOneRequiredWithoutDestinationsNestedInput
@@ -674,9 +728,11 @@ export type RouteUpdateWithoutOriginInput = {
 export type RouteUncheckedUpdateWithoutOriginInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  routeNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   destinationLocationId?: Prisma.StringFieldUpdateOperationsInput | string
   distanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   estimatedDurationMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  pathCoordinates?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -684,9 +740,11 @@ export type RouteUncheckedUpdateWithoutOriginInput = {
 export type RouteUncheckedUpdateManyWithoutOriginInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  routeNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   destinationLocationId?: Prisma.StringFieldUpdateOperationsInput | string
   distanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   estimatedDurationMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  pathCoordinates?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -694,8 +752,10 @@ export type RouteUncheckedUpdateManyWithoutOriginInput = {
 export type RouteUpdateWithoutDestinationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  routeNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   distanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   estimatedDurationMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  pathCoordinates?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   origin?: Prisma.LocationUpdateOneRequiredWithoutOriginsNestedInput
@@ -704,9 +764,11 @@ export type RouteUpdateWithoutDestinationInput = {
 export type RouteUncheckedUpdateWithoutDestinationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  routeNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originLocationId?: Prisma.StringFieldUpdateOperationsInput | string
   distanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   estimatedDurationMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  pathCoordinates?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -714,9 +776,11 @@ export type RouteUncheckedUpdateWithoutDestinationInput = {
 export type RouteUncheckedUpdateManyWithoutDestinationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  routeNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originLocationId?: Prisma.StringFieldUpdateOperationsInput | string
   distanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   estimatedDurationMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  pathCoordinates?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -726,10 +790,12 @@ export type RouteUncheckedUpdateManyWithoutDestinationInput = {
 export type RouteSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
+  routeNumber?: boolean
   originLocationId?: boolean
   destinationLocationId?: boolean
   distanceKm?: boolean
   estimatedDurationMin?: boolean
+  pathCoordinates?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   origin?: boolean | Prisma.LocationDefaultArgs<ExtArgs>
@@ -739,10 +805,12 @@ export type RouteSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
 export type RouteSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
+  routeNumber?: boolean
   originLocationId?: boolean
   destinationLocationId?: boolean
   distanceKm?: boolean
   estimatedDurationMin?: boolean
+  pathCoordinates?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   origin?: boolean | Prisma.LocationDefaultArgs<ExtArgs>
@@ -752,10 +820,12 @@ export type RouteSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 export type RouteSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
+  routeNumber?: boolean
   originLocationId?: boolean
   destinationLocationId?: boolean
   distanceKm?: boolean
   estimatedDurationMin?: boolean
+  pathCoordinates?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   origin?: boolean | Prisma.LocationDefaultArgs<ExtArgs>
@@ -765,15 +835,17 @@ export type RouteSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 export type RouteSelectScalar = {
   id?: boolean
   name?: boolean
+  routeNumber?: boolean
   originLocationId?: boolean
   destinationLocationId?: boolean
   distanceKm?: boolean
   estimatedDurationMin?: boolean
+  pathCoordinates?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type RouteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "originLocationId" | "destinationLocationId" | "distanceKm" | "estimatedDurationMin" | "createdAt" | "updatedAt", ExtArgs["result"]["route"]>
+export type RouteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "routeNumber" | "originLocationId" | "destinationLocationId" | "distanceKm" | "estimatedDurationMin" | "pathCoordinates" | "createdAt" | "updatedAt", ExtArgs["result"]["route"]>
 export type RouteInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   origin?: boolean | Prisma.LocationDefaultArgs<ExtArgs>
   destination?: boolean | Prisma.LocationDefaultArgs<ExtArgs>
@@ -796,10 +868,12 @@ export type $RoutePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     name: string
+    routeNumber: string | null
     originLocationId: string
     destinationLocationId: string
     distanceKm: number | null
     estimatedDurationMin: number | null
+    pathCoordinates: runtime.JsonValue | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["route"]>
@@ -1229,10 +1303,12 @@ export interface Prisma__RouteClient<T, Null = never, ExtArgs extends runtime.Ty
 export interface RouteFieldRefs {
   readonly id: Prisma.FieldRef<"Route", 'String'>
   readonly name: Prisma.FieldRef<"Route", 'String'>
+  readonly routeNumber: Prisma.FieldRef<"Route", 'String'>
   readonly originLocationId: Prisma.FieldRef<"Route", 'String'>
   readonly destinationLocationId: Prisma.FieldRef<"Route", 'String'>
   readonly distanceKm: Prisma.FieldRef<"Route", 'Float'>
   readonly estimatedDurationMin: Prisma.FieldRef<"Route", 'Int'>
+  readonly pathCoordinates: Prisma.FieldRef<"Route", 'Json'>
   readonly createdAt: Prisma.FieldRef<"Route", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Route", 'DateTime'>
 }

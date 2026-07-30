@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { SeatMapClient } from '../../../../features/seat-selection/seat-map-client';
+import { RouteMapCard } from '../../../../features/route-map/route-map-card';
 import { getPassengerSession } from '../../../../lib/auth';
 import { formatDateTime, formatMoney } from '../../../../lib/format';
 import { PageHeader } from '../../../../shared/components/PageHeader';
@@ -21,7 +22,12 @@ export default async function TripPage({
   searchParams,
 }: {
   params: { tripId: string };
-  searchParams: { fare?: string; currency?: string; departureAt?: string };
+  searchParams: {
+    routeId?: string;
+    fare?: string;
+    currency?: string;
+    departureAt?: string;
+  };
 }) {
   const session = await getPassengerSession();
   if (!session) redirect(`/login?next=/trips/${params.tripId}`);
@@ -53,6 +59,10 @@ export default async function TripPage({
         }
         title="Choose your seats"
       />
+
+      {searchParams.routeId ? (
+        <RouteMapCard routeId={searchParams.routeId} />
+      ) : null}
 
       <SeatMapClient
         currency={currency}

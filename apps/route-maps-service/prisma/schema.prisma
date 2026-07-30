@@ -1,6 +1,6 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
   moduleFormat = "cjs"
 }
 
@@ -9,26 +9,28 @@ datasource db {
 }
 
 model Location {
-  id        String   @id @default(uuid())
-  name      String
-  code      String?
-  latitude  Float
-  longitude Float
-  city      String?
-  district  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  origins   Route[]  @relation("RouteOrigin")
-  destinations Route[] @relation("RouteDestination")
+  id           String   @id @default(uuid())
+  name         String
+  code         String?
+  latitude     Float
+  longitude    Float
+  city         String?
+  district     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  origins      Route[]  @relation("RouteOrigin")
+  destinations Route[]  @relation("RouteDestination")
 }
 
 model Route {
   id                    String   @id @default(uuid())
   name                  String
+  routeNumber           String?
   originLocationId      String
   destinationLocationId String
   distanceKm            Float?
   estimatedDurationMin  Int?
+  pathCoordinates       Json?
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
   origin                Location @relation("RouteOrigin", fields: [originLocationId], references: [id])

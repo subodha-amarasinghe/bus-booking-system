@@ -181,6 +181,7 @@ services:
       RABBITMQ_URL: amqp://bus:bus@rabbitmq:5672
       DATABASE_URL: postgresql://bus:bus@postgres-route-maps:5432/route_maps_db
       JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      OSRM_BASE_URL: ${OSRM_BASE_URL:-https://router.project-osrm.org}
     depends_on:
       rabbitmq:
         condition: service_healthy

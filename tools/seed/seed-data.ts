@@ -118,6 +118,7 @@ export const routes = [
   {
     id: '20000000-0000-4000-8000-000000000001',
     name: 'Colombo → Kandy',
+    routeNumber: '1',
     originLocationId: locations[0].id,
     destinationLocationId: locations[1].id,
     distanceKm: 115,
@@ -126,6 +127,7 @@ export const routes = [
   {
     id: '20000000-0000-4000-8000-000000000002',
     name: 'Colombo → Galle',
+    routeNumber: '2',
     originLocationId: locations[0].id,
     destinationLocationId: locations[2].id,
     distanceKm: 126,
@@ -134,6 +136,7 @@ export const routes = [
   {
     id: '20000000-0000-4000-8000-000000000003',
     name: 'Colombo → Jaffna',
+    routeNumber: '87',
     originLocationId: locations[0].id,
     destinationLocationId: locations[3].id,
     distanceKm: 396,
@@ -142,10 +145,20 @@ export const routes = [
   {
     id: '20000000-0000-4000-8000-000000000004',
     name: 'Galle → Matara',
+    routeNumber: '32',
     originLocationId: locations[2].id,
     destinationLocationId: locations[4].id,
     distanceKm: 45,
     estimatedDurationMin: 70,
+  },
+  {
+    id: '20000000-0000-4000-8000-000000000005',
+    name: 'Colombo → Jaffna',
+    routeNumber: '15',
+    originLocationId: locations[0].id,
+    destinationLocationId: locations[3].id,
+    distanceKm: 430,
+    estimatedDurationMin: 600,
   },
 ];
 
@@ -307,6 +320,17 @@ export const trips = [
     fareAmount: 600,
     currency: 'LKR',
     availableSeats: buses[0].capacity,
+    status: 'SCHEDULED',
+  },
+  {
+    id: '50000000-0000-4000-8000-000000000005',
+    busId: buses[1].id,
+    routeId: routes[4].id,
+    departureAt: at(2, 14),
+    arrivalAt: at(3, 0),
+    fareAmount: 3800,
+    currency: 'LKR',
+    availableSeats: buses[1].capacity,
     status: 'SCHEDULED',
   },
 ];

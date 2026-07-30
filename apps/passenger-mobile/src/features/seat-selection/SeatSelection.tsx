@@ -14,6 +14,7 @@ import {
   SeatGridSkeleton,
   SeatLegend,
 } from '../../components/SeatGrid';
+import { RouteMapCard } from '../../components/RouteMapCard';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import {
@@ -52,12 +53,14 @@ export function SeatSelection({
   fare,
   currency,
   departureAt,
+  routeId,
 }: {
   tripId: string;
   session: PassengerSession;
   fare: number;
   currency: string;
   departureAt?: string;
+  routeId?: string;
 }) {
   const router = useRouter();
   const [lockError, setLockError] = useState('');
@@ -155,9 +158,14 @@ export function SeatSelection({
   return (
     <>
       <Screen>
+        {routeId ? <RouteMapCard routeId={routeId} /> : null}
         {departureAt ? (
           <View style={styles.tripMeta}>
-            <Ionicons color={colors.slate400} name="calendar-outline" size={14} />
+            <Ionicons
+              color={colors.slate400}
+              name="calendar-outline"
+              size={14}
+            />
             <Text style={styles.tripMetaText}>
               Departs {formatDateTime(departureAt)}
             </Text>

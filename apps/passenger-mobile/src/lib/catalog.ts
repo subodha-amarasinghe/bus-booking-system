@@ -46,7 +46,11 @@ export function routeLabel(
 ): string {
   const route = routes?.find((candidate) => candidate.id === routeId);
   if (!route) return 'Route';
-  if (route.name) return route.name;
+  if (route.name) {
+    return route.routeNumber
+      ? `${route.name} [${route.routeNumber}]`
+      : route.name;
+  }
   return `${locationName(locations, route.originLocationId)} → ${locationName(
     locations,
     route.destinationLocationId,

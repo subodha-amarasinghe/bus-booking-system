@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import type { RouteCoordinate } from '@bus-booking/shared-types';
 import { PrismaService } from '../prisma/prisma.service';
 import type { Location, Route } from '../generated/prisma/client';
 
@@ -48,10 +49,12 @@ export class RouteRepository {
 
   createRoute(data: {
     name: string;
+    routeNumber: string;
     originLocationId: string;
     destinationLocationId: string;
-    distanceKm?: number;
-    estimatedDurationMin?: number;
+    distanceKm: number;
+    estimatedDurationMin: number;
+    pathCoordinates: RouteCoordinate[];
   }): Promise<Route> {
     return this.prisma.route.create({ data });
   }

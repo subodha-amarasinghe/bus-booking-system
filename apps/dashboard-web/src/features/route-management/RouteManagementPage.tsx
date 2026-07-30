@@ -5,11 +5,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
+import Link from 'next/link';
 import type { z } from 'zod';
 import { MapPin, Plus, ShieldCheck, Waypoints } from 'lucide-react';
 import {
   CreateLocationRequestSchema,
-  CreateRouteRequestSchema,
   UserRole,
   type Location,
   type Route,
@@ -24,13 +24,6 @@ import { SectionCard } from '../../components/SectionCard';
 import { errorMessage, postJson, queryKeys } from '../../lib/client-api';
 
 type LocationFormValues = z.infer<typeof CreateLocationRequestSchema>;
-type RouteFormValues = z.infer<typeof CreateRouteRequestSchema>;
-
-/** Empty optional number inputs must become `undefined`, not `NaN`. */
-const optionalNumber = {
-  setValueAs: (value: string) =>
-    value === '' ? undefined : Number(value),
-} as const;
 
 type Tab = 'locations' | 'routes';
 
@@ -222,7 +215,9 @@ function LocationsTab() {
               <ErrorAlert message={errorMessage(createLocation.error)} />
             ) : null}
             {savedName ? (
-              <SuccessAlert message={`${savedName} is now available as a stop.`} />
+              <SuccessAlert
+                message={`${savedName} is now available as a stop.`}
+              />
             ) : null}
 
             <button
@@ -245,32 +240,11 @@ function LocationsTab() {
 }
 
 function RoutesTab() {
-  const queryClient = useQueryClient();
-  const [savedName, setSavedName] = useState<string | null>(null);
   const locationsQuery = useLocations();
 
   const routesQuery = useQuery({
     queryKey: queryKeys.routes,
     queryFn: () => postJson<Route[]>('/api/routes/list', {}),
-  });
-
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<RouteFormValues>({
-    resolver: zodResolver(CreateRouteRequestSchema),
-  });
-
-  const createRoute = useMutation({
-    mutationFn: (values: RouteFormValues) =>
-      postJson<Route>('/api/routes', values),
-    onSuccess: async (route) => {
-      setSavedName(route.name);
-      reset();
-      await queryClient.invalidateQueries({ queryKey: queryKeys.routes });
-    },
   });
 
   const locations = locationsQuery.data ?? [];
@@ -279,7 +253,15 @@ function RoutesTab() {
     locations.find((location) => location.id === id)?.name ?? 'Unknown stop';
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_24rem]">
+    <div className="space-y-4">
+      <RequireRole allowed={[UserRole.ADMIN_STAFF]} fallback={null}>
+        <div className="flex justify-end">
+          <Link className="ui-btn-primary" href="/dashboard/routes/add">
+            <Plus className="h-4 w-4" aria-hidden />
+            Add route
+          </Link>
+        </div>
+      </RequireRole>
       <SectionCard
         title="Routes"
         description={
@@ -304,6 +286,7 @@ function RoutesTab() {
             <table className="ui-table">
               <thead>
                 <tr>
+                  <th scope="col">Number</th>
                   <th scope="col">Route</th>
                   <th scope="col">From</th>
                   <th scope="col">To</th>
@@ -314,11 +297,16 @@ function RoutesTab() {
               <tbody className="divide-y divide-slate-100">
                 {routes.map((route) => (
                   <tr key={route.id}>
+                    <td className="font-mono font-semibold text-brand-700">
+                      {route.routeNumber ?? '—'}
+                    </td>
                     <td className="font-medium text-slate-900">{route.name}</td>
                     <td>{locationName(route.originLocationId)}</td>
                     <td>{locationName(route.destinationLocationId)}</td>
                     <td className="whitespace-nowrap">
-                      {route.distanceKm != null ? `${route.distanceKm} km` : '—'}
+                      {route.distanceKm != null
+                        ? `${route.distanceKm} km`
+                        : '—'}
                     </td>
                     <td className="whitespace-nowrap">
                       {route.estimatedDurationMin != null
@@ -334,161 +322,6 @@ function RoutesTab() {
           </div>
         )}
       </SectionCard>
-
-      <RequireRole
-        allowed={[UserRole.ADMIN_STAFF]}
-        fallback={
-          <SectionCard title="Add a route" className="h-fit">
-            <EmptyState
-              icon={ShieldCheck}
-              title="Admin staff only"
-              description="You can browse routes here; creating them needs an admin account."
-            />
-          </SectionCard>
-        }
-      >
-        <SectionCard
-          title="Add a route"
-          description="Admin staff only."
-          icon={Plus}
-          className="h-fit"
-        >
-          {locationsQuery.isPending ? (
-            <LoadingBlock label="Loading stops…" />
-          ) : locations.length === 0 ? (
-            <EmptyState
-              icon={MapPin}
-              title="Add stops first"
-              description="A route needs an origin and a destination, so create at least two stops."
-            />
-          ) : (
-            <form
-              className="space-y-4"
-              onSubmit={handleSubmit((values) => {
-                setSavedName(null);
-                createRoute.mutate(values);
-              })}
-            >
-              <Field
-                label="Route name"
-                htmlFor="routeName"
-                error={errors.name ? 'Give the route a name.' : undefined}
-              >
-                <input
-                  id="routeName"
-                  className="ui-input"
-                  placeholder="Colombo → Kandy"
-                  {...register('name')}
-                />
-              </Field>
-
-              <Field
-                label="From"
-                htmlFor="originLocationId"
-                error={errors.originLocationId ? 'Choose an origin stop.' : undefined}
-              >
-                <select
-                  id="originLocationId"
-                  className="ui-select"
-                  defaultValue=""
-                  {...register('originLocationId')}
-                >
-                  <option value="" disabled>
-                    Select a stop…
-                  </option>
-                  {locations.map((location) => (
-                    <option key={location.id} value={location.id}>
-                      {location.name}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-
-              <Field
-                label="To"
-                htmlFor="destinationLocationId"
-                error={
-                  errors.destinationLocationId
-                    ? 'Choose a destination stop.'
-                    : undefined
-                }
-              >
-                <select
-                  id="destinationLocationId"
-                  className="ui-select"
-                  defaultValue=""
-                  {...register('destinationLocationId')}
-                >
-                  <option value="" disabled>
-                    Select a stop…
-                  </option>
-                  {locations.map((location) => (
-                    <option key={location.id} value={location.id}>
-                      {location.name}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-
-              <div className="grid grid-cols-2 gap-3">
-                <Field
-                  label="Distance (km)"
-                  htmlFor="distanceKm"
-                  hint="Optional."
-                  error={errors.distanceKm ? 'Use a positive number.' : undefined}
-                >
-                  <input
-                    id="distanceKm"
-                    type="number"
-                    step="any"
-                    min={0}
-                    className="ui-input"
-                    {...register('distanceKm', optionalNumber)}
-                  />
-                </Field>
-                <Field
-                  label="Duration (min)"
-                  htmlFor="estimatedDurationMin"
-                  hint="Optional."
-                  error={
-                    errors.estimatedDurationMin
-                      ? 'Use whole minutes.'
-                      : undefined
-                  }
-                >
-                  <input
-                    id="estimatedDurationMin"
-                    type="number"
-                    min={0}
-                    className="ui-input"
-                    {...register('estimatedDurationMin', optionalNumber)}
-                  />
-                </Field>
-              </div>
-
-              {createRoute.isError ? (
-                <ErrorAlert message={errorMessage(createRoute.error)} />
-              ) : null}
-              {savedName ? (
-                <SuccessAlert message={`Route “${savedName}” was created.`} />
-              ) : null}
-
-              <button
-                type="submit"
-                className="ui-btn-primary w-full"
-                disabled={createRoute.isPending}
-              >
-                {createRoute.isPending ? (
-                  <Spinner />
-                ) : (
-                  <Plus className="h-4 w-4" aria-hidden />
-                )}
-                {createRoute.isPending ? 'Saving…' : 'Add route'}
-              </button>
-            </form>
-          )}
-        </SectionCard>
-      </RequireRole>
     </div>
   );
 }

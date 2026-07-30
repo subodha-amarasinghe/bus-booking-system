@@ -150,6 +150,7 @@ export default function SearchResultsScreen() {
                   pathname: '/trips/[tripId]',
                   params: {
                     tripId: trip.id,
+                    routeId: trip.routeId,
                     fare: String(trip.fareAmount),
                     currency: trip.currency,
                     departureAt: String(trip.departureAt),

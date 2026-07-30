@@ -7,6 +7,7 @@ import { SeatSelection } from '../../../features/seat-selection/SeatSelection';
 export default function TripSeatMapScreen() {
   const params = useLocalSearchParams<{
     tripId?: string;
+    routeId?: string;
     fare?: string;
     currency?: string;
     departureAt?: string;
@@ -33,6 +34,7 @@ export default function TripSeatMapScreen() {
           currency={params.currency ?? 'LKR'}
           departureAt={params.departureAt}
           fare={Number.isFinite(fare) ? fare : 0}
+          routeId={params.routeId}
           session={session}
           tripId={params.tripId as string}
         />

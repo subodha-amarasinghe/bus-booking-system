@@ -88,6 +88,11 @@ function TripCard({
             {route?.origin && route.destination
               ? `${route.origin} → ${route.destination}`
               : route?.name ?? 'Intercity service'}
+            {route?.routeNumber ? (
+              <span className="rounded-md bg-brand-50 px-2 py-0.5 font-bold text-brand-700">
+                [{route.routeNumber}]
+              </span>
+            ) : null}
           </p>
         </div>
 
@@ -126,7 +131,7 @@ function TripCard({
       ) : (
         <Link
           className="ui-btn-primary mt-4 min-h-[48px] w-full sm:w-auto"
-          href={`/trips/${trip.id}?fare=${trip.fareAmount}&currency=${trip.currency}&departureAt=${encodeURIComponent(
+          href={`/trips/${trip.id}?routeId=${trip.routeId}&fare=${trip.fareAmount}&currency=${trip.currency}&departureAt=${encodeURIComponent(
             new Date(trip.departureAt).toISOString(),
           )}`}
         >
