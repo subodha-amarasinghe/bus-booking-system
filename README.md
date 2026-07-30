@@ -2,6 +2,11 @@
 
 Nx monorepo for a multi-service bus booking platform: NestJS backends, a Next.js staff dashboard, and an Expo passenger app.
 
+## Guides
+
+- **[Local setup guide](docs/LOCAL_SETUP.md)** — run everything on your machine (hybrid, full Docker, or no Docker).
+- **[Deployment guide](docs/DEPLOYMENT.md)** — ship to a single VM with Docker Compose or to AWS with managed services.
+
 ## Prerequisites
 
 - **Node.js 20+** (Docker images use Node 22)
