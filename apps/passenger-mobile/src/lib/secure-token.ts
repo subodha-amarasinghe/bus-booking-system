@@ -1,19 +1,34 @@
 /**
- * Token helpers backed by expo-secure-store.
- * SecureStore persists small secrets in the device keychain / Keystore.
+ * Token storage backed by expo-secure-store (device keychain / Keystore).
+ *
+ * The mobile client talks to the API gateway directly, so unlike the web app —
+ * which keeps the JWT in an HttpOnly cookie the browser never exposes — the
+ * token has to live on the device. SecureStore is the safest place for it.
  */
 import * as SecureStore from 'expo-secure-store';
 
 const ACCESS_TOKEN_KEY = 'access_token';
+const REFRESH_TOKEN_KEY = 'refresh_token';
 
-export async function saveAccessToken(token: string): Promise<void> {
-  await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, token);
+export async function saveTokens(
+  accessToken: string,
+  refreshToken?: string,
+): Promise<void> {
+  await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, accessToken);
+  if (refreshToken) {
+    await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken);
+  }
 }
 
 export async function getAccessToken(): Promise<string | null> {
   return SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
 }
 
-export async function clearAccessToken(): Promise<void> {
+export async function getRefreshToken(): Promise<string | null> {
+  return SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
+}
+
+export async function clearTokens(): Promise<void> {
   await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
+  await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
 }

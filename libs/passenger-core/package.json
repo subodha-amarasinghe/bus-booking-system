@@ -6,6 +6,7 @@
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
   "dependencies": {
+    "@babel/runtime": "^7.26.0",
     "@bus-booking/shared-types": "workspace:*",
     "@bus-booking-system/shared-events": "workspace:*",
     "@tanstack/react-query": "^5.62.8",

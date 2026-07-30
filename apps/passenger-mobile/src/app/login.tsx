@@ -1,62 +1,130 @@
-import { useState } from 'react';
-import { Alert, Button, StyleSheet, Text, TextInput, View } from 'react-native';
-import { saveAccessToken } from '../lib/secure-token';
+import { LoginRequestSchema } from '@bus-booking/shared-types';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'expo-router';
+import { Controller, useForm } from 'react-hook-form';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Button } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
+import { AlertBanner } from '../components/ui/Feedback';
+import { Input } from '../components/ui/Input';
+import { Screen, SectionTitle } from '../components/ui/Screen';
+import { useAuth } from '../lib/auth-context';
+import { colors, fontSize, radius, spacing } from '../theme/tokens';
+
+type LoginValues = { phone: string; password: string };
 
 export default function LoginScreen() {
-  const [phone, setPhone] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const { signIn } = useAuth();
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    setError,
+  } = useForm<LoginValues>({
+    resolver: zodResolver(LoginRequestSchema),
+    defaultValues: { phone: '', password: '' },
+  });
 
-  async function onLogin() {
-    setLoading(true);
+  const submit = handleSubmit(async (values) => {
     try {
-      // Stub: replace with API gateway auth call
-      await saveAccessToken('stub-access-token');
-      Alert.alert('Logged in', 'Access token stored in SecureStore (stub).');
+      await signIn(values);
+      router.back();
     } catch (error) {
-      Alert.alert('Login failed', String(error));
-    } finally {
-      setLoading(false);
+      setError('root', {
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Could not sign in. Please try again.',
+      });
     }
-  }
+  });
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Phone</Text>
-      <TextInput
-        style={styles.input}
-        value={phone}
-        onChangeText={setPhone}
-        keyboardType="phone-pad"
-        autoCapitalize="none"
+    <Screen>
+      <SectionTitle
+        subtitle="Sign in to hold seats and manage your tickets."
+        title="Welcome back"
       />
-      <Text style={styles.label}>Password</Text>
-      <TextInput
-        style={styles.input}
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-      <Button title={loading ? 'Signing in…' : 'Sign in'} onPress={onLogin} disabled={loading} />
-    </View>
+
+      <Card style={styles.card}>
+        {errors.root?.message ? (
+          <AlertBanner>{errors.root.message}</AlertBanner>
+        ) : null}
+
+        <Controller
+          control={control}
+          name="phone"
+          render={({ field }) => (
+            <Input
+              error={errors.phone?.message}
+              keyboardType="phone-pad"
+              label="Phone number"
+              onChangeText={field.onChange}
+              placeholder="0771111111"
+              value={field.value}
+            />
+          )}
+        />
+
+        <Controller
+          control={control}
+          name="password"
+          render={({ field }) => (
+            <Input
+              error={errors.password?.message}
+              label="Password"
+              onChangeText={field.onChange}
+              placeholder="Your password"
+              secureTextEntry
+              value={field.value}
+            />
+          )}
+        />
+
+        <Button
+          fullWidth
+          label="Sign in"
+          loading={isSubmitting}
+          onPress={() => void submit()}
+        />
+
+        <View style={styles.demo}>
+          <Text style={styles.demoLabel}>Demo account</Text>
+          <Text style={styles.demoValue}>0771111111 · Password123!</Text>
+        </View>
+      </Card>
+
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => router.replace('/register')}
+        style={styles.footerLink}
+      >
+        <Text style={styles.footerText}>
+          New here? <Text style={styles.footerStrong}>Create an account</Text>
+        </Text>
+      </Pressable>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 24,
-    backgroundColor: '#fff',
+  card: { gap: spacing.lg },
+  demo: {
+    gap: 2,
+    padding: spacing.md,
+    backgroundColor: colors.slate50,
+    borderRadius: radius.md,
   },
-  label: {
-    marginBottom: 6,
-    color: '#556',
+  demoLabel: {
+    fontSize: fontSize.xs,
+    fontWeight: '700',
+    color: colors.slate400,
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
   },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-  },
+  demoValue: { fontSize: fontSize.sm, color: colors.slate600 },
+  footerLink: { alignItems: 'center', paddingVertical: spacing.md },
+  footerText: { fontSize: fontSize.sm, color: colors.slate500 },
+  footerStrong: { color: colors.brand700, fontWeight: '700' },
 });

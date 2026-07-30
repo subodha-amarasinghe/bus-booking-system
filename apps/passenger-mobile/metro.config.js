@@ -1,11 +1,10 @@
 const { withNxMetro } = require('@nx/expo');
-// Expo SDK 55+ ships Metro via `@expo/metro`. `getDefaultConfig` and
-// `mergeConfig` must come from the Expo-provided Metro instance.
+// On SDK 52 Metro is a plain dependency; `@expo/metro` only exists on SDK 55+.
 const { getDefaultConfig } = require('expo/metro-config');
-const { mergeConfig } = require('@expo/metro/metro-config');
+const { mergeConfig } = require('metro-config');
 
 const defaultConfig = getDefaultConfig(__dirname);
-const { assetExts, sourceExts } = defaultConfig.resolver;
+const { sourceExts } = defaultConfig.resolver;
 
 /**
  * Metro configuration
@@ -14,13 +13,10 @@ const { assetExts, sourceExts } = defaultConfig.resolver;
  * @type {import('metro-config').MetroConfig}
  */
 const customConfig = {
-  cacheVersion: "passenger-mobile",
-  transformer: {
-    babelTransformerPath: require.resolve('react-native-svg-transformer'),
-  },
+  cacheVersion: 'passenger-mobile',
   resolver: {
-    assetExts: assetExts.filter((ext) => ext !== 'svg'),
-    sourceExts: [...sourceExts, 'cjs', 'mjs', 'svg'],
+    // Workspace libs are published as source and some deps ship CJS/ESM only.
+    sourceExts: [...sourceExts, 'cjs', 'mjs'],
   },
 };
 
