@@ -89,7 +89,7 @@ export function SeatSelection({
     () => () => {
       const state = useBookingDraftStore.getState();
       const locks = Object.entries(state.lockTokens).map(
-        ([seatNo, lockToken]) => ({ seatNo, lockToken }),
+        ([seatNo, lockToken]) => ({ seatNo: Number(seatNo), lockToken }),
       );
       if (state.tripId && locks.length > 0) {
         void passengerApi

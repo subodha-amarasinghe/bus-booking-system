@@ -7,7 +7,7 @@ export const BookingConfirmedSchema = z.object({
   bookingId: z.string().uuid(),
   tripId: z.string().uuid(),
   userId: z.string().uuid(),
-  seatNo: z.string(),
+  seatNo: z.coerce.number().int().min(1).max(59),
   fareAmount: z.number().nonnegative(),
   currency: z.string().default('LKR'),
   passengerName: z.string(),

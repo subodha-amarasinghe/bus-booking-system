@@ -40,7 +40,7 @@ interface SeatLayoutView {
   rows: number;
   columns: number;
   seats: Array<{
-    seatNo: string;
+    seatNo: number;
     row: number;
     column: number;
     type?: SeatMapSeat['type'];
@@ -84,7 +84,7 @@ export class BookingService {
   }
 
   async releaseSeats(dto: ReleaseSeatsRequest): Promise<ReleaseSeatsResponse> {
-    const releasedSeatNos: string[] = [];
+    const releasedSeatNos: number[] = [];
 
     for (const lock of dto.locks) {
       const redisKey = this.lockKey(dto.tripId, lock.seatNo);
@@ -261,7 +261,7 @@ export class BookingService {
     return this.toConfirmResponse(booking);
   }
 
-  private lockKey(tripId: string, seatNo: string): string {
+  private lockKey(tripId: string, seatNo: number): string {
     return `lock:trip:${tripId}:seat:${seatNo}`;
   }
 
@@ -289,7 +289,7 @@ export class BookingService {
     id: string;
     status: string;
     tripId: string;
-    seatNo: string;
+    seatNo: number;
     passengerName: string;
     passengerPhone: string;
     fareAmount: number;

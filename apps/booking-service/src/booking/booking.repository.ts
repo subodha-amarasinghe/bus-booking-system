@@ -26,7 +26,7 @@ export class BookingRepository {
     });
   }
 
-  findActiveSeat(tripId: string, seatNo: string): Promise<Booking | null> {
+  findActiveSeat(tripId: string, seatNo: number): Promise<Booking | null> {
     return this.prisma.booking.findFirst({
       where: {
         tripId,
@@ -39,7 +39,7 @@ export class BookingRepository {
   create(data: {
     tripId: string;
     userId: string;
-    seatNo: string;
+    seatNo: number;
     status: string;
     passengerName: string;
     passengerPhone: string;

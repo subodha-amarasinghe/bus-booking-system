@@ -8,7 +8,7 @@ import { SeatGateway } from '../seats/seat.gateway';
 
 export interface ActiveLock {
   tripId: string;
-  seatNo: string;
+  seatNo: number;
   lockToken: string;
   expiresAt: number;
 }
@@ -36,11 +36,11 @@ export class RedisLockExpiryService implements OnModuleInit, OnModuleDestroy {
     this.activeLocks.set(key, lock);
   }
 
-  untrack(tripId: string, seatNo: string): void {
+  untrack(tripId: string, seatNo: number): void {
     this.activeLocks.delete(this.lockKey(tripId, seatNo));
   }
 
-  private lockKey(tripId: string, seatNo: string): string {
+  private lockKey(tripId: string, seatNo: number): string {
     return `lock:trip:${tripId}:seat:${seatNo}`;
   }
 

@@ -1,18 +1,18 @@
-import type { SeatLock } from '@bus-booking/shared-types';
+import type { SeatLock, SeatNo } from '@bus-booking/shared-types';
 import { create } from 'zustand';
 
 export interface BookingDraftState {
   tripId: string | null;
-  selectedSeats: string[];
+  selectedSeats: SeatNo[];
   lockTokens: Record<string, string>;
   expiresAt: Date | null;
   idempotencyKey: string;
   startTrip(tripId: string): void;
-  selectSeat(seatNo: string): void;
-  deselectSeat(seatNo: string): void;
-  toggleSeat(seatNo: string): void;
+  selectSeat(seatNo: SeatNo): void;
+  deselectSeat(seatNo: SeatNo): void;
+  toggleSeat(seatNo: SeatNo): void;
   setLocks(locks: SeatLock[]): void;
-  removeLocks(seatNos: string[]): void;
+  removeLocks(seatNos: SeatNo[]): void;
   reset(): void;
 }
 
@@ -24,7 +24,7 @@ function createIdempotencyKey(): string {
 
 const initialDraft = () => ({
   tripId: null,
-  selectedSeats: [] as string[],
+  selectedSeats: [] as SeatNo[],
   lockTokens: {} as Record<string, string>,
   expiresAt: null,
   idempotencyKey: createIdempotencyKey(),
@@ -61,7 +61,7 @@ export const useBookingDraftStore = create<BookingDraftState>((set) => ({
     set((state) => {
       const lockTokens = { ...state.lockTokens };
       for (const lock of locks) {
-        lockTokens[lock.seatNo] = lock.lockToken;
+        lockTokens[String(lock.seatNo)] = lock.lockToken;
       }
       const earliestExpiry = locks.reduce<number | null>(
         (earliest, lock) =>
@@ -73,9 +73,7 @@ export const useBookingDraftStore = create<BookingDraftState>((set) => ({
       return {
         lockTokens,
         expiresAt:
-          earliestExpiry === null
-            ? state.expiresAt
-            : new Date(earliestExpiry),
+          earliestExpiry === null ? state.expiresAt : new Date(earliestExpiry),
       };
     }),
 
@@ -83,7 +81,7 @@ export const useBookingDraftStore = create<BookingDraftState>((set) => ({
     set((state) => {
       const lockTokens = { ...state.lockTokens };
       for (const seatNo of seatNos) {
-        delete lockTokens[seatNo];
+        delete lockTokens[String(seatNo)];
       }
       return {
         lockTokens,

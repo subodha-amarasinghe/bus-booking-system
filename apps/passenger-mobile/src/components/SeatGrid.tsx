@@ -3,24 +3,31 @@ import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, fontSize, radius, spacing } from '../theme/tokens';
 
-type SeatVisual = 'available' | 'selected' | 'locked' | 'booked' | 'unavailable';
+type SeatVisual =
+  | 'available'
+  | 'selected'
+  | 'locked'
+  | 'booked'
+  | 'unavailable';
 
-const SEAT_STYLE: Record<SeatVisual, { bg: string; border: string; fg: string }> =
-  {
-    available: {
-      bg: colors.emerald50,
-      border: colors.emerald300,
-      fg: colors.emerald800,
-    },
-    selected: { bg: colors.brand600, border: colors.brand600, fg: colors.white },
-    locked: { bg: colors.amber50, border: colors.amber300, fg: colors.amber700 },
-    booked: { bg: colors.slate100, border: colors.slate200, fg: colors.slate400 },
-    unavailable: {
-      bg: colors.slate100,
-      border: colors.slate200,
-      fg: colors.slate400,
-    },
-  };
+const SEAT_STYLE: Record<
+  SeatVisual,
+  { bg: string; border: string; fg: string }
+> = {
+  available: {
+    bg: colors.emerald50,
+    border: colors.emerald300,
+    fg: colors.emerald800,
+  },
+  selected: { bg: colors.brand600, border: colors.brand600, fg: colors.white },
+  locked: { bg: colors.amber50, border: colors.amber300, fg: colors.amber700 },
+  booked: { bg: colors.slate100, border: colors.slate200, fg: colors.slate400 },
+  unavailable: {
+    bg: colors.slate100,
+    border: colors.slate200,
+    fg: colors.slate400,
+  },
+};
 
 function visualFor(seat: SeatMapSeat, selected: boolean): SeatVisual {
   if (selected) return 'selected';
@@ -39,8 +46,8 @@ export function SeatGrid({
 }: {
   seats: SeatMapSeat[];
   columns: number;
-  selectedSeats: string[];
-  onToggle: (seatNo: string) => void;
+  selectedSeats: number[];
+  onToggle: (seatNo: number) => void;
   /** Once seats are held, the selection is fixed until release or expiry. */
   frozen?: boolean;
 }) {
@@ -59,14 +66,29 @@ export function SeatGrid({
       }));
   }, [seats]);
 
-  // Aisle down the middle, the way coach seating actually reads.
-  const aisleAfter = Math.floor(columns / 2) - 1;
+  const compact = columns >= 6;
 
   return (
     <View style={styles.grid}>
       {rows.map(({ row, seats: rowSeats }) => (
-        <View key={row} style={styles.row}>
-          {rowSeats.map((seat) => {
+        <View key={row} style={[styles.row, compact && styles.compactRow]}>
+          {Array.from({ length: columns }, (_, column) => {
+            const seat = rowSeats.find(
+              (candidate) => candidate.column === column,
+            );
+            if (!seat) {
+              return (
+                <View
+                  accessibilityElementsHidden
+                  key={`aisle-${row}-${column}`}
+                  style={[
+                    styles.seat,
+                    styles.emptySlot,
+                    compact && styles.compactSeat,
+                  ]}
+                />
+              );
+            }
             const selected = selectedSeats.includes(seat.seatNo);
             const visual = visualFor(seat, selected);
             const tone = SEAT_STYLE[visual];
@@ -74,29 +96,26 @@ export function SeatGrid({
               seat.status === 'AVAILABLE' && (!frozen || selected);
 
             return (
-              <View key={seat.seatNo} style={styles.seatSlot}>
-                <Pressable
-                  accessibilityLabel={`Seat ${seat.seatNo}, ${visual}`}
-                  accessibilityRole="button"
-                  accessibilityState={{
-                    selected,
-                    disabled: !selectable,
-                  }}
-                  disabled={!selectable}
-                  onPress={() => onToggle(seat.seatNo)}
-                  style={[
-                    styles.seat,
-                    { backgroundColor: tone.bg, borderColor: tone.border },
-                  ]}
-                >
-                  <Text style={[styles.seatLabel, { color: tone.fg }]}>
-                    {seat.seatNo}
-                  </Text>
-                </Pressable>
-                {seat.column === aisleAfter ? (
-                  <View style={styles.aisle} />
-                ) : null}
-              </View>
+              <Pressable
+                accessibilityLabel={`Seat ${seat.seatNo}, ${visual}`}
+                accessibilityRole="button"
+                accessibilityState={{
+                  selected,
+                  disabled: !selectable,
+                }}
+                disabled={!selectable}
+                key={seat.seatNo}
+                onPress={() => onToggle(seat.seatNo)}
+                style={[
+                  styles.seat,
+                  compact && styles.compactSeat,
+                  { backgroundColor: tone.bg, borderColor: tone.border },
+                ]}
+              >
+                <Text style={[styles.seatLabel, { color: tone.fg }]}>
+                  {seat.seatNo}
+                </Text>
+              </Pressable>
             );
           })}
         </View>
@@ -139,9 +158,7 @@ export function SeatGridSkeleton({ rows = 8, columns = 4 }) {
       {Array.from({ length: rows }, (_, row) => (
         <View key={row} style={styles.row}>
           {Array.from({ length: columns }, (_, column) => (
-            <View key={column} style={styles.seatSlot}>
-              <View style={[styles.seat, styles.seatSkeleton]} />
-            </View>
+            <View key={column} style={[styles.seat, styles.seatSkeleton]} />
           ))}
         </View>
       ))}
@@ -152,7 +169,7 @@ export function SeatGridSkeleton({ rows = 8, columns = 4 }) {
 const styles = StyleSheet.create({
   grid: { gap: spacing.sm, alignItems: 'center' },
   row: { flexDirection: 'row', gap: spacing.sm },
-  seatSlot: { flexDirection: 'row', alignItems: 'center' },
+  compactRow: { gap: 6 },
   seat: {
     width: 52,
     height: 48,
@@ -161,12 +178,13 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderRadius: radius.md,
   },
+  compactSeat: { width: 44, height: 44 },
+  emptySlot: { borderWidth: 0 },
   seatSkeleton: {
     backgroundColor: colors.slate100,
     borderColor: colors.slate200,
   },
   seatLabel: { fontSize: fontSize.sm, fontWeight: '700' },
-  aisle: { width: spacing.xl },
   legend: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   legendSwatch: {

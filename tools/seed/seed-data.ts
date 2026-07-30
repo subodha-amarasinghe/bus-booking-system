@@ -10,7 +10,10 @@ import { scryptSync } from 'crypto';
 export const SEED_PASSWORD = 'Password123!';
 
 /** Mirrors AuthService.hashPassword, with a fixed salt so re-seeding is stable. */
-export function hashPassword(password: string, salt = 'bus0booking0seed0salt00000000000'): string {
+export function hashPassword(
+  password: string,
+  salt = 'bus0booking0seed0salt00000000000',
+): string {
   const hash = scryptSync(password, salt, 64).toString('hex');
   return `${salt}:${hash}`;
 }
@@ -150,54 +153,105 @@ export const buses = [
   {
     id: '30000000-0000-4000-8000-000000000001',
     plateNumber: 'NA-1234',
-    name: 'Express Liner 1',
-    capacity: 40,
+    name: 'Standard Intercity 2×3',
+    capacity: 56,
     operatorId: 'operator-lanka-express',
-    rows: 10,
-    columns: 4,
+    regularRows: 10,
+    leftSeats: 2,
+    rightSeats: 3,
+    rearSeats: 6,
   },
   {
     id: '30000000-0000-4000-8000-000000000002',
     plateNumber: 'NB-5678',
-    name: 'Highway Cruiser',
-    capacity: 32,
+    name: 'Highway Luxury 2×2',
+    capacity: 49,
     operatorId: 'operator-lanka-express',
-    rows: 8,
-    columns: 4,
+    regularRows: 11,
+    leftSeats: 2,
+    rightSeats: 2,
+    rearSeats: 5,
   },
   {
     id: '30000000-0000-4000-8000-000000000003',
     plateNumber: 'NC-9012',
-    name: 'Night Rider',
-    capacity: 44,
+    name: 'Night Luxury 2×2',
+    capacity: 45,
     operatorId: 'operator-southern-lines',
-    rows: 11,
-    columns: 4,
+    regularRows: 10,
+    leftSeats: 2,
+    rightSeats: 2,
+    rearSeats: 5,
   },
 ];
 
 export interface SeedSeat {
-  seatNo: string;
+  seatNo: number;
   row: number;
   column: number;
   type: 'STANDARD' | 'WINDOW' | 'AISLE' | 'DISABLED';
   isAvailable: boolean;
 }
 
-/** Standard 2+2 coach: outer columns are windows, inner columns are aisles. */
-export function buildSeats(rows: number, columns: number): SeedSeat[] {
+/**
+ * Builds real coach geometry: regular rows skip a physical aisle column and
+ * the solid rear bench fills it. Seat numbers are sequential integers from the
+ * front of the bus (1…N), never row+letter labels.
+ */
+export function buildSeats(configuration: {
+  regularRows: number;
+  leftSeats: number;
+  rightSeats: number;
+  rearSeats: number;
+}): SeedSeat[] {
+  const capacity =
+    configuration.regularRows *
+      (configuration.leftSeats + configuration.rightSeats) +
+    configuration.rearSeats;
+  if (capacity > 59) {
+    throw new Error('A seat map cannot have more than 59 seats.');
+  }
+
   const seats: SeedSeat[] = [];
-  for (let row = 0; row < rows; row += 1) {
-    for (let column = 0; column < columns; column += 1) {
-      const isWindow = column === 0 || column === columns - 1;
+  const seatsPerRow = configuration.leftSeats + configuration.rightSeats;
+  let seatNo = 1;
+
+  for (let row = 0; row < configuration.regularRows; row += 1) {
+    for (let ordinal = 0; ordinal < seatsPerRow; ordinal += 1) {
+      const onRight = ordinal >= configuration.leftSeats;
+      const column = onRight ? ordinal + 1 : ordinal;
+      const isWindow = ordinal === 0 || ordinal === seatsPerRow - 1;
+      const isAisle =
+        ordinal === configuration.leftSeats - 1 ||
+        ordinal === configuration.leftSeats;
       seats.push({
-        seatNo: `${row + 1}${String.fromCharCode(65 + column)}`,
+        seatNo,
         row,
         column,
-        type: isWindow ? 'WINDOW' : 'AISLE',
+        type: isWindow ? 'WINDOW' : isAisle ? 'AISLE' : 'STANDARD',
         isAvailable: true,
       });
+      seatNo += 1;
     }
+  }
+
+  const columns = Math.max(
+    configuration.leftSeats + 1 + configuration.rightSeats,
+    configuration.rearSeats,
+  );
+  const offset = Math.floor((columns - configuration.rearSeats) / 2);
+  for (let ordinal = 0; ordinal < configuration.rearSeats; ordinal += 1) {
+    seats.push({
+      seatNo,
+      row: configuration.regularRows,
+      column: offset + ordinal,
+      type:
+        ordinal === 0 || ordinal === configuration.rearSeats - 1
+          ? 'WINDOW'
+          : 'STANDARD',
+      isAvailable: true,
+    });
+    seatNo += 1;
   }
   return seats;
 }
@@ -205,9 +259,9 @@ export function buildSeats(rows: number, columns: number): SeedSeat[] {
 export const seatLayouts = buses.map((bus, index) => ({
   id: `40000000-0000-4000-8000-00000000000${index + 1}`,
   busId: bus.id,
-  rows: bus.rows,
-  columns: bus.columns,
-  seats: buildSeats(bus.rows, bus.columns),
+  rows: bus.regularRows + 1,
+  columns: Math.max(bus.leftSeats + 1 + bus.rightSeats, bus.rearSeats),
+  seats: buildSeats(bus),
 }));
 
 export const trips = [
@@ -219,7 +273,7 @@ export const trips = [
     arrivalAt: at(1, 9),
     fareAmount: 1500,
     currency: 'LKR',
-    availableSeats: 40,
+    availableSeats: buses[0].capacity,
     status: 'SCHEDULED',
   },
   {
@@ -230,7 +284,7 @@ export const trips = [
     arrivalAt: at(1, 11),
     fareAmount: 1200,
     currency: 'LKR',
-    availableSeats: 32,
+    availableSeats: buses[1].capacity,
     status: 'SCHEDULED',
   },
   {
@@ -241,7 +295,7 @@ export const trips = [
     arrivalAt: at(3, 5),
     fareAmount: 3500,
     currency: 'LKR',
-    availableSeats: 44,
+    availableSeats: buses[2].capacity,
     status: 'SCHEDULED',
   },
   {
@@ -252,7 +306,7 @@ export const trips = [
     arrivalAt: at(3, 17),
     fareAmount: 600,
     currency: 'LKR',
-    availableSeats: 40,
+    availableSeats: buses[0].capacity,
     status: 'SCHEDULED',
   },
 ];
@@ -262,7 +316,7 @@ export const bookings = [
     id: '60000000-0000-4000-8000-000000000001',
     tripId: trips[0].id,
     userId: users[2].id,
-    seatNo: '1A',
+    seatNo: 1,
     status: 'CONFIRMED',
     passengerName: users[2].name,
     passengerPhone: users[2].phone,
@@ -275,7 +329,7 @@ export const bookings = [
     id: '60000000-0000-4000-8000-000000000002',
     tripId: trips[0].id,
     userId: users[3].id,
-    seatNo: '1B',
+    seatNo: 2,
     status: 'CONFIRMED',
     passengerName: users[3].name,
     passengerPhone: users[3].phone,
@@ -288,7 +342,7 @@ export const bookings = [
     id: '60000000-0000-4000-8000-000000000003',
     tripId: trips[1].id,
     userId: users[2].id,
-    seatNo: '3C',
+    seatNo: 11,
     status: 'CONFIRMED',
     passengerName: users[2].name,
     passengerPhone: users[2].phone,
@@ -301,7 +355,7 @@ export const bookings = [
     id: '60000000-0000-4000-8000-000000000004',
     tripId: trips[2].id,
     userId: users[3].id,
-    seatNo: '5D',
+    seatNo: 20,
     status: 'CANCELLED',
     passengerName: users[3].name,
     passengerPhone: users[3].phone,
@@ -388,21 +442,33 @@ export const notificationLogs = [
   {
     id: 'b0000000-0000-4000-8000-000000000001',
     event: 'user.created',
-    payload: { userId: users[2].id, phone: users[2].phone, name: users[2].name },
+    payload: {
+      userId: users[2].id,
+      phone: users[2].phone,
+      name: users[2].name,
+    },
     channel: 'LOG',
     status: 'SENT',
   },
   {
     id: 'b0000000-0000-4000-8000-000000000002',
     event: 'booking.confirmed',
-    payload: { bookingId: bookings[0].id, tripId: bookings[0].tripId, seatNo: bookings[0].seatNo },
+    payload: {
+      bookingId: bookings[0].id,
+      tripId: bookings[0].tripId,
+      seatNo: bookings[0].seatNo,
+    },
     channel: 'EMAIL',
     status: 'SENT',
   },
   {
     id: 'b0000000-0000-4000-8000-000000000003',
     event: 'payment.succeeded',
-    payload: { paymentId: payments[0].id, bookingId: payments[0].bookingId, amount: payments[0].amount },
+    payload: {
+      paymentId: payments[0].id,
+      bookingId: payments[0].bookingId,
+      amount: payments[0].amount,
+    },
     channel: 'SMS',
     status: 'SENT',
   },

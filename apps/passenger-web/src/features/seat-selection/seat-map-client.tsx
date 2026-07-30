@@ -82,7 +82,7 @@ export function SeatMapClient({
       const body = JSON.stringify({
         tripId,
         locks: Object.entries(current.lockTokens).map(([seatNo, lockToken]) => ({
-          seatNo,
+          seatNo: Number(seatNo),
           lockToken,
         })),
       });

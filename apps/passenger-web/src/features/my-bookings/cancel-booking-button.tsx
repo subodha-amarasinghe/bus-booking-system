@@ -14,7 +14,7 @@ export function CancelBookingButton({
 }: {
   bookingId: string;
   userId: string;
-  seatNo: string;
+  seatNo: number;
 }) {
   const router = useRouter();
   const [confirming, setConfirming] = useState(false);

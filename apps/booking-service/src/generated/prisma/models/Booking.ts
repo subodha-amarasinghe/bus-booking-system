@@ -27,10 +27,12 @@ export type AggregateBooking = {
 }
 
 export type BookingAvgAggregateOutputType = {
+  seatNo: number | null
   fareAmount: number | null
 }
 
 export type BookingSumAggregateOutputType = {
+  seatNo: number | null
   fareAmount: number | null
 }
 
@@ -38,7 +40,7 @@ export type BookingMinAggregateOutputType = {
   id: string | null
   tripId: string | null
   userId: string | null
-  seatNo: string | null
+  seatNo: number | null
   status: string | null
   passengerName: string | null
   passengerPhone: string | null
@@ -56,7 +58,7 @@ export type BookingMaxAggregateOutputType = {
   id: string | null
   tripId: string | null
   userId: string | null
-  seatNo: string | null
+  seatNo: number | null
   status: string | null
   passengerName: string | null
   passengerPhone: string | null
@@ -91,10 +93,12 @@ export type BookingCountAggregateOutputType = {
 
 
 export type BookingAvgAggregateInputType = {
+  seatNo?: true
   fareAmount?: true
 }
 
 export type BookingSumAggregateInputType = {
+  seatNo?: true
   fareAmount?: true
 }
 
@@ -243,7 +247,7 @@ export type BookingGroupByOutputType = {
   id: string
   tripId: string
   userId: string
-  seatNo: string
+  seatNo: number
   status: string
   passengerName: string
   passengerPhone: string
@@ -284,7 +288,7 @@ export type BookingWhereInput = {
   id?: Prisma.StringFilter<"Booking"> | string
   tripId?: Prisma.StringFilter<"Booking"> | string
   userId?: Prisma.StringFilter<"Booking"> | string
-  seatNo?: Prisma.StringFilter<"Booking"> | string
+  seatNo?: Prisma.IntFilter<"Booking"> | number
   status?: Prisma.StringFilter<"Booking"> | string
   passengerName?: Prisma.StringFilter<"Booking"> | string
   passengerPhone?: Prisma.StringFilter<"Booking"> | string
@@ -325,7 +329,7 @@ export type BookingWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.BookingWhereInput | Prisma.BookingWhereInput[]
   tripId?: Prisma.StringFilter<"Booking"> | string
   userId?: Prisma.StringFilter<"Booking"> | string
-  seatNo?: Prisma.StringFilter<"Booking"> | string
+  seatNo?: Prisma.IntFilter<"Booking"> | number
   status?: Prisma.StringFilter<"Booking"> | string
   passengerName?: Prisma.StringFilter<"Booking"> | string
   passengerPhone?: Prisma.StringFilter<"Booking"> | string
@@ -368,7 +372,7 @@ export type BookingScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Booking"> | string
   tripId?: Prisma.StringWithAggregatesFilter<"Booking"> | string
   userId?: Prisma.StringWithAggregatesFilter<"Booking"> | string
-  seatNo?: Prisma.StringWithAggregatesFilter<"Booking"> | string
+  seatNo?: Prisma.IntWithAggregatesFilter<"Booking"> | number
   status?: Prisma.StringWithAggregatesFilter<"Booking"> | string
   passengerName?: Prisma.StringWithAggregatesFilter<"Booking"> | string
   passengerPhone?: Prisma.StringWithAggregatesFilter<"Booking"> | string
@@ -386,7 +390,7 @@ export type BookingCreateInput = {
   id?: string
   tripId: string
   userId: string
-  seatNo: string
+  seatNo: number
   status?: string
   passengerName: string
   passengerPhone: string
@@ -404,7 +408,7 @@ export type BookingUncheckedCreateInput = {
   id?: string
   tripId: string
   userId: string
-  seatNo: string
+  seatNo: number
   status?: string
   passengerName: string
   passengerPhone: string
@@ -422,7 +426,7 @@ export type BookingUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tripId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  seatNo?: Prisma.StringFieldUpdateOperationsInput | string
+  seatNo?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.StringFieldUpdateOperationsInput | string
   passengerName?: Prisma.StringFieldUpdateOperationsInput | string
   passengerPhone?: Prisma.StringFieldUpdateOperationsInput | string
@@ -440,7 +444,7 @@ export type BookingUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tripId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  seatNo?: Prisma.StringFieldUpdateOperationsInput | string
+  seatNo?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.StringFieldUpdateOperationsInput | string
   passengerName?: Prisma.StringFieldUpdateOperationsInput | string
   passengerPhone?: Prisma.StringFieldUpdateOperationsInput | string
@@ -458,7 +462,7 @@ export type BookingCreateManyInput = {
   id?: string
   tripId: string
   userId: string
-  seatNo: string
+  seatNo: number
   status?: string
   passengerName: string
   passengerPhone: string
@@ -476,7 +480,7 @@ export type BookingUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tripId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  seatNo?: Prisma.StringFieldUpdateOperationsInput | string
+  seatNo?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.StringFieldUpdateOperationsInput | string
   passengerName?: Prisma.StringFieldUpdateOperationsInput | string
   passengerPhone?: Prisma.StringFieldUpdateOperationsInput | string
@@ -494,7 +498,7 @@ export type BookingUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tripId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  seatNo?: Prisma.StringFieldUpdateOperationsInput | string
+  seatNo?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.StringFieldUpdateOperationsInput | string
   passengerName?: Prisma.StringFieldUpdateOperationsInput | string
   passengerPhone?: Prisma.StringFieldUpdateOperationsInput | string
@@ -510,7 +514,7 @@ export type BookingUncheckedUpdateManyInput = {
 
 export type BookingTripIdSeatNoStatusCompoundUniqueInput = {
   tripId: string
-  seatNo: string
+  seatNo: number
   status: string
 }
 
@@ -533,6 +537,7 @@ export type BookingCountOrderByAggregateInput = {
 }
 
 export type BookingAvgOrderByAggregateInput = {
+  seatNo?: Prisma.SortOrder
   fareAmount?: Prisma.SortOrder
 }
 
@@ -573,11 +578,20 @@ export type BookingMinOrderByAggregateInput = {
 }
 
 export type BookingSumOrderByAggregateInput = {
+  seatNo?: Prisma.SortOrder
   fareAmount?: Prisma.SortOrder
 }
 
 export type StringFieldUpdateOperationsInput = {
   set?: string
+}
+
+export type IntFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
 export type FloatFieldUpdateOperationsInput = {
@@ -683,7 +697,7 @@ export type $BookingPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     id: string
     tripId: string
     userId: string
-    seatNo: string
+    seatNo: number
     status: string
     passengerName: string
     passengerPhone: string
@@ -1121,7 +1135,7 @@ export interface BookingFieldRefs {
   readonly id: Prisma.FieldRef<"Booking", 'String'>
   readonly tripId: Prisma.FieldRef<"Booking", 'String'>
   readonly userId: Prisma.FieldRef<"Booking", 'String'>
-  readonly seatNo: Prisma.FieldRef<"Booking", 'String'>
+  readonly seatNo: Prisma.FieldRef<"Booking", 'Int'>
   readonly status: Prisma.FieldRef<"Booking", 'String'>
   readonly passengerName: Prisma.FieldRef<"Booking", 'String'>
   readonly passengerPhone: Prisma.FieldRef<"Booking", 'String'>

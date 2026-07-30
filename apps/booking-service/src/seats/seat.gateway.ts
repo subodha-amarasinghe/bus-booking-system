@@ -30,7 +30,7 @@ export class SeatGateway {
     void client.join(room);
   }
 
-  emitSeatLocked(tripId: string, seatNo: string, lockToken: string): void {
+  emitSeatLocked(tripId: string, seatNo: number, lockToken: string): void {
     this.server.to(`trip:${tripId}`).emit(SEAT_SOCKET_LOCKED, {
       tripId,
       seatNo,
@@ -38,11 +38,11 @@ export class SeatGateway {
     });
   }
 
-  emitSeatReleased(tripId: string, seatNo: string): void {
+  emitSeatReleased(tripId: string, seatNo: number): void {
     this.server.to(`trip:${tripId}`).emit(SEAT_SOCKET_RELEASED, { tripId, seatNo });
   }
 
-  emitSeatBooked(tripId: string, seatNo: string, bookingId: string): void {
+  emitSeatBooked(tripId: string, seatNo: number, bookingId: string): void {
     this.server.to(`trip:${tripId}`).emit(SEAT_SOCKET_BOOKED, {
       tripId,
       seatNo,

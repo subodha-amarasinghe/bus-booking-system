@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { SeatNoSchema } from './seat-no';
 
 export const BusSchema = z.object({
   id: z.string().uuid(),
@@ -35,10 +36,12 @@ export const SeatLayoutSchema = z.object({
   columns: z.number().int().positive(),
   seats: z.array(
     z.object({
-      seatNo: z.string().min(1),
+      seatNo: SeatNoSchema,
       row: z.number().int().nonnegative(),
       column: z.number().int().nonnegative(),
-      type: z.enum(['STANDARD', 'WINDOW', 'AISLE', 'DISABLED']).default('STANDARD'),
+      type: z
+        .enum(['STANDARD', 'WINDOW', 'AISLE', 'DISABLED'])
+        .default('STANDARD'),
       isAvailable: z.boolean().default(true),
     }),
   ),
@@ -53,10 +56,12 @@ export const SaveSeatLayoutRequestSchema = z.object({
   columns: z.number().int().positive(),
   seats: z.array(
     z.object({
-      seatNo: z.string().min(1),
+      seatNo: SeatNoSchema,
       row: z.number().int().nonnegative(),
       column: z.number().int().nonnegative(),
-      type: z.enum(['STANDARD', 'WINDOW', 'AISLE', 'DISABLED']).default('STANDARD'),
+      type: z
+        .enum(['STANDARD', 'WINDOW', 'AISLE', 'DISABLED'])
+        .default('STANDARD'),
       isAvailable: z.boolean().default(true),
     }),
   ),
@@ -79,7 +84,9 @@ export const TripSchema = z.object({
   fareAmount: z.number().nonnegative(),
   currency: z.string().default('LKR'),
   availableSeats: z.number().int().nonnegative().optional(),
-  status: z.enum(['SCHEDULED', 'BOARDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']).default('SCHEDULED'),
+  status: z
+    .enum(['SCHEDULED', 'BOARDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'])
+    .default('SCHEDULED'),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
 });

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { SeatNoSchema } from './seat-no';
 
 export enum BookingStatus {
   LOCKED = 'LOCKED',
@@ -15,7 +16,7 @@ export const BookingSchema = z.object({
   id: z.string().uuid(),
   tripId: z.string().uuid(),
   userId: z.string().uuid(),
-  seatNo: z.string().min(1),
+  seatNo: SeatNoSchema,
   status: BookingStatusSchema,
   passengerName: z.string().min(1),
   passengerPhone: z.string().min(1),
@@ -32,7 +33,7 @@ export type Booking = z.infer<typeof BookingSchema>;
 
 export const LockSeatRequestSchema = z.object({
   tripId: z.string().uuid(),
-  seatNo: z.string().min(1),
+  seatNo: SeatNoSchema,
   userId: z.string().uuid(),
 });
 export type LockSeatRequest = z.infer<typeof LockSeatRequestSchema>;
@@ -45,7 +46,7 @@ export type LockSeatResponse = z.infer<typeof LockSeatResponseSchema>;
 
 export const ConfirmBookingRequestSchema = z.object({
   tripId: z.string().uuid(),
-  seatNo: z.string().min(1),
+  seatNo: SeatNoSchema,
   userId: z.string().uuid(),
   lockToken: z.string().min(1),
   idempotencyKey: z.string().min(1),
@@ -58,14 +59,16 @@ export const ConfirmBookingResponseSchema = z.object({
   bookingId: z.string().uuid(),
   status: BookingStatusSchema,
   tripId: z.string().uuid(),
-  seatNo: z.string().min(1),
+  seatNo: SeatNoSchema,
   passengerName: z.string().min(1),
   passengerPhone: z.string().min(1),
   fareAmount: z.number().nonnegative(),
   currency: z.string().default('LKR'),
   confirmedAt: z.coerce.date(),
 });
-export type ConfirmBookingResponse = z.infer<typeof ConfirmBookingResponseSchema>;
+export type ConfirmBookingResponse = z.infer<
+  typeof ConfirmBookingResponseSchema
+>;
 
 export const SeatAvailabilitySchema = z.enum([
   'AVAILABLE',
@@ -76,12 +79,10 @@ export const SeatAvailabilitySchema = z.enum([
 export type SeatAvailability = z.infer<typeof SeatAvailabilitySchema>;
 
 export const SeatMapSeatSchema = z.object({
-  seatNo: z.string().min(1),
+  seatNo: SeatNoSchema,
   row: z.number().int().nonnegative(),
   column: z.number().int().nonnegative(),
-  type: z
-    .enum(['STANDARD', 'WINDOW', 'AISLE', 'DISABLED'])
-    .default('STANDARD'),
+  type: z.enum(['STANDARD', 'WINDOW', 'AISLE', 'DISABLED']).default('STANDARD'),
   status: SeatAvailabilitySchema,
   lockExpiresAt: z.coerce.date().optional(),
 });
@@ -98,13 +99,13 @@ export type SeatMapResponse = z.infer<typeof SeatMapResponseSchema>;
 
 export const LockSeatsRequestSchema = z.object({
   tripId: z.string().uuid(),
-  seatNos: z.array(z.string().min(1)).min(1),
+  seatNos: z.array(SeatNoSchema).min(1),
   userId: z.string().uuid(),
 });
 export type LockSeatsRequest = z.infer<typeof LockSeatsRequestSchema>;
 
 export const SeatLockSchema = z.object({
-  seatNo: z.string().min(1),
+  seatNo: SeatNoSchema,
   lockToken: z.string().min(1),
   expiresAt: z.coerce.date(),
 });
@@ -121,7 +122,7 @@ export const ReleaseSeatsRequestSchema = z.object({
   locks: z
     .array(
       z.object({
-        seatNo: z.string().min(1),
+        seatNo: SeatNoSchema,
         lockToken: z.string().min(1),
       }),
     )
@@ -131,11 +132,9 @@ export type ReleaseSeatsRequest = z.infer<typeof ReleaseSeatsRequestSchema>;
 
 export const ReleaseSeatsResponseSchema = z.object({
   tripId: z.string().uuid(),
-  releasedSeatNos: z.array(z.string().min(1)),
+  releasedSeatNos: z.array(SeatNoSchema),
 });
-export type ReleaseSeatsResponse = z.infer<
-  typeof ReleaseSeatsResponseSchema
->;
+export type ReleaseSeatsResponse = z.infer<typeof ReleaseSeatsResponseSchema>;
 
 export const MyBookingsRequestSchema = z.object({
   userId: z.string().uuid(),

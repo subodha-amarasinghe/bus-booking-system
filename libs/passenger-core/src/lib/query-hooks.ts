@@ -1,24 +1,15 @@
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ConfirmBookingResponse } from '@bus-booking/shared-types';
 import type { PassengerApi, SearchTripsRequest } from './api';
 import { useBookingDraftStore } from './booking-draft-store';
 
 export const passengerQueryKeys = {
-  trips: (input: SearchTripsRequest) =>
-    ['passenger', 'trips', input] as const,
-  seatMap: (tripId: string) =>
-    ['passenger', 'seat-map', tripId] as const,
+  trips: (input: SearchTripsRequest) => ['passenger', 'trips', input] as const,
+  seatMap: (tripId: string) => ['passenger', 'seat-map', tripId] as const,
   myBookings: () => ['passenger', 'my-bookings'] as const,
 };
 
-export function useTripSearch(
-  api: PassengerApi,
-  input: SearchTripsRequest,
-) {
+export function useTripSearch(api: PassengerApi, input: SearchTripsRequest) {
   return useQuery({
     queryKey: passengerQueryKeys.trips(input),
     queryFn: () => api.searchTrips(input),
@@ -82,7 +73,7 @@ export function useBookingDraft(api: PassengerApi) {
         throw new Error('No trip selected');
       }
       const locks = Object.entries(draft.lockTokens).map(
-        ([seatNo, lockToken]) => ({ seatNo, lockToken }),
+        ([seatNo, lockToken]) => ({ seatNo: Number(seatNo), lockToken }),
       );
       if (locks.length === 0) {
         return { tripId: draft.tripId, releasedSeatNos: [] };
@@ -108,7 +99,7 @@ export function useBookingDraft(api: PassengerApi) {
       }
       return Promise.all(
         draft.selectedSeats.map((seatNo, index) => {
-          const lockToken = draft.lockTokens[seatNo];
+          const lockToken = draft.lockTokens[String(seatNo)];
           if (!lockToken) {
             throw new Error(`Seat ${seatNo} is not locked`);
           }

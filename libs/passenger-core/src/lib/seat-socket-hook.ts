@@ -38,7 +38,7 @@ export function useSeatMapSocket(
     const tripId = options.tripId;
 
     const updateSeat = (
-      seatNo: string,
+      seatNo: number,
       seatStatus: SeatAvailability,
     ) => {
       queryClient.setQueryData<SeatMapResponse>(

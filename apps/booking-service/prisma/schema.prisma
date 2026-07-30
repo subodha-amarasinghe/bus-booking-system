@@ -12,7 +12,7 @@ model Booking {
   id              String    @id @default(uuid())
   tripId          String
   userId          String
-  seatNo          String
+  seatNo          Int
   status          String    @default("LOCKED")
   passengerName   String
   passengerPhone  String

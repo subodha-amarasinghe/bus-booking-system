@@ -21,8 +21,13 @@ function seatClassName(seat: SeatMapSeat, selected: boolean): string {
   }
 }
 
-/** Groups the flat seat list into deck rows so a centre aisle can be drawn. */
-function toRows(seats: SeatMapSeat[]): SeatMapSeat[][] {
+/**
+ * Groups the flat list without discarding coordinates. Configured layouts skip
+ * one column for the aisle on regular rows, while the rear bench fills it.
+ */
+function toRows(
+  seats: SeatMapSeat[],
+): Array<{ rowNumber: number; seats: SeatMapSeat[] }> {
   const rows = new Map<number, SeatMapSeat[]>();
   for (const seat of seats) {
     const row = rows.get(seat.row);
@@ -31,7 +36,10 @@ function toRows(seats: SeatMapSeat[]): SeatMapSeat[][] {
   }
   return [...rows.entries()]
     .sort(([a], [b]) => a - b)
-    .map(([, row]) => [...row].sort((a, b) => a.column - b.column));
+    .map(([rowNumber, row]) => ({
+      rowNumber,
+      seats: [...row].sort((a, b) => a.column - b.column),
+    }));
 }
 
 export function SeatGrid({
@@ -43,46 +51,49 @@ export function SeatGrid({
 }: {
   columns: number;
   seats: SeatMapSeat[];
-  selectedSeats: string[];
+  selectedSeats: number[];
   locked: boolean;
-  onToggle(seatNo: string): void;
+  onToggle(seatNo: number): void;
 }) {
   const rows = toRows(seats);
-  const aisleAfter = columns > 2 ? Math.floor(columns / 2) : -1;
 
   return (
     <div className="overflow-x-auto pb-1">
       <div className="mx-auto flex w-fit flex-col gap-2">
-        {rows.map((row, rowIndex) => (
-          <div className="flex items-center gap-2" key={rowIndex}>
+        {rows.map(({ rowNumber, seats: row }) => (
+          <div className="flex items-center gap-2" key={rowNumber}>
             <span className="w-5 shrink-0 text-right text-xs font-medium text-slate-400">
-              {rowIndex + 1}
+              {rowNumber + 1}
             </span>
-            {row.map((seat, seatIndex) => {
-              const selected = selectedSeats.includes(seat.seatNo);
-              const unavailable = seat.status !== 'AVAILABLE' && !selected;
-              return (
-                <div className="flex items-center gap-2" key={seat.seatNo}>
+            <div
+              className="grid gap-2"
+              style={{
+                gridTemplateColumns: `repeat(${columns}, minmax(3rem, 1fr))`,
+              }}
+            >
+              {row.map((seat) => {
+                const selected = selectedSeats.includes(seat.seatNo);
+                const unavailable = seat.status !== 'AVAILABLE' && !selected;
+                return (
                   <button
+                    key={seat.seatNo}
                     aria-label={`Seat ${seat.seatNo}, ${
                       selected
                         ? 'selected'
-                        : SEAT_LABELS[seat.status] ?? 'unavailable'
+                        : (SEAT_LABELS[seat.status] ?? 'unavailable')
                     }`}
                     aria-pressed={selected}
                     className={seatClassName(seat, selected)}
                     disabled={unavailable || locked}
                     onClick={() => onToggle(seat.seatNo)}
+                    style={{ gridColumnStart: seat.column + 1 }}
                     type="button"
                   >
                     {seat.seatNo}
                   </button>
-                  {seatIndex + 1 === aisleAfter && (
-                    <span aria-hidden="true" className="w-4 sm:w-6" />
-                  )}
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         ))}
       </div>
