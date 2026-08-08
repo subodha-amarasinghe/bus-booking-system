@@ -1,6 +1,7 @@
 'use client';
 
 import { SearchTripsRequestSchema } from '@bus-booking/shared-types';
+import clsx from 'clsx';
 import { ArrowLeftRight, CalendarDays, MapPin, Search } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -26,10 +27,13 @@ export function TripSearchForm({
   locations,
   defaults,
   submitLabel = 'Search buses',
+  compact = false,
 }: {
   locations: LocationOption[];
   defaults?: TripSearchDefaults;
   submitLabel?: string;
+  /** Desktop: single-row refine bar with shorter controls (search results page). */
+  compact?: boolean;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -85,25 +89,38 @@ export function TripSearchForm({
   }
 
   const noLocations = locations.length === 0;
+  const fieldHeight = compact ? 'min-h-[44px] lg:min-h-[40px]' : 'min-h-[48px]';
+  const labelClass = clsx(
+    'ui-label',
+    compact && 'lg:mb-1 lg:text-xs',
+  );
 
   return (
     <form
       action="/search"
-      className="space-y-4"
+      className={clsx(
+        compact ? 'space-y-3 lg:space-y-0' : 'space-y-4',
+        compact && 'lg:flex lg:items-end lg:gap-3',
+      )}
       method="get"
       onSubmit={submit}
       noValidate
     >
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label className="ui-label" htmlFor="originLocationId">
+      <div
+        className={clsx(
+          'grid gap-4 sm:grid-cols-2',
+          compact && 'gap-3 lg:flex lg:min-w-0 lg:flex-1 lg:gap-3',
+        )}
+      >
+        <div className={clsx(compact && 'lg:min-w-0 lg:flex-1')}>
+          <label className={labelClass} htmlFor="originLocationId">
             <span className="inline-flex items-center gap-1.5">
               <MapPin aria-hidden="true" className="h-4 w-4 text-brand-600" />
               Travelling from
             </span>
           </label>
           <select
-            className="ui-select min-h-[48px]"
+            className={clsx('ui-select', fieldHeight)}
             disabled={noLocations}
             id="originLocationId"
             name="originLocationId"
@@ -119,16 +136,19 @@ export function TripSearchForm({
           </select>
         </div>
 
-        <div>
+        <div className={clsx(compact && 'lg:min-w-0 lg:flex-1')}>
           <div className="flex items-center justify-between gap-2">
-            <label className="ui-label" htmlFor="destinationLocationId">
+            <label className={labelClass} htmlFor="destinationLocationId">
               <span className="inline-flex items-center gap-1.5">
                 <MapPin aria-hidden="true" className="h-4 w-4 text-brand-600" />
                 Travelling to
               </span>
             </label>
             <button
-              className="mb-1.5 inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-brand-700 dark:text-brand-300 hover:bg-brand-50 dark:bg-brand-950"
+              className={clsx(
+                'inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-brand-700 hover:bg-brand-50 dark:bg-brand-950 dark:text-brand-300',
+                compact ? 'mb-1' : 'mb-1.5',
+              )}
               onClick={swap}
               type="button"
             >
@@ -137,7 +157,7 @@ export function TripSearchForm({
             </button>
           </div>
           <select
-            className="ui-select min-h-[48px]"
+            className={clsx('ui-select', fieldHeight)}
             disabled={noLocations}
             id="destinationLocationId"
             name="destinationLocationId"
@@ -154,15 +174,15 @@ export function TripSearchForm({
         </div>
       </div>
 
-      <div>
-        <label className="ui-label" htmlFor="departureDate">
+      <div className={clsx(compact && 'lg:w-44 lg:shrink-0')}>
+        <label className={labelClass} htmlFor="departureDate">
           <span className="inline-flex items-center gap-1.5">
             <CalendarDays aria-hidden="true" className="h-4 w-4 text-brand-600" />
             Travel date
           </span>
         </label>
         <input
-          className="ui-input min-h-[48px]"
+          className={clsx('ui-input', fieldHeight)}
           id="departureDate"
           name="departureDate"
           onChange={(event) => setDepartureDate(event.target.value)}
@@ -171,15 +191,27 @@ export function TripSearchForm({
         />
       </div>
 
-      {error && <AlertBanner>{error}</AlertBanner>}
-      {noLocations && (
-        <AlertBanner>
-          Locations could not be loaded. Start the API gateway and run{' '}
-          <code className="font-mono">pnpm db:seed</code>, then refresh.
-        </AlertBanner>
+      {(error || noLocations) && (
+        <div className={clsx(compact && 'w-full lg:basis-full')}>
+          {error && <AlertBanner>{error}</AlertBanner>}
+          {noLocations && (
+            <AlertBanner>
+              Locations could not be loaded. Start the API gateway and run{' '}
+              <code className="font-mono">pnpm db:seed</code>, then refresh.
+            </AlertBanner>
+          )}
+        </div>
       )}
 
-      <button className="ui-btn-primary min-h-[48px] w-full" type="submit">
+      <button
+        className={clsx(
+          'ui-btn-primary w-full',
+          compact
+            ? 'min-h-[44px] lg:min-h-[40px] lg:w-auto lg:shrink-0 lg:px-5'
+            : 'min-h-[48px]',
+        )}
+        type="submit"
+      >
         <Search aria-hidden="true" className="h-[18px] w-[18px]" />
         {submitLabel}
       </button>

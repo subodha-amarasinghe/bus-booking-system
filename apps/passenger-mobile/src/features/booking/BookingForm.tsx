@@ -88,17 +88,19 @@ export function BookingForm({
       });
 
       const first = bookings[0];
-      const total = bookings.reduce(
+      const bookedTotal = bookings.reduce(
         (sum, booking) => sum + booking.fareAmount,
         0,
       );
+      const total =
+        bookedTotal > 0 ? bookedTotal : fare * bookings.length;
 
       router.replace({
         pathname: '/payment/[bookingId]',
         params: {
           bookingId: first.bookingId,
           amount: String(total),
-          currency: first.currency,
+          currency: first.currency || currency,
           seats: bookings.map((booking) => booking.seatNo).join(','),
         },
       });

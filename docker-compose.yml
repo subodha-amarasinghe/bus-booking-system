@@ -236,7 +236,10 @@ services:
       RABBITMQ_URL: amqp://bus:bus@rabbitmq:5672
       DATABASE_URL: postgresql://bus:bus@postgres-payment:5432/payment_db
       JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
-      PAYMENT_PROVIDER_URL: ${PAYMENT_PROVIDER_URL:-}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      PASSENGER_WEB_ORIGIN: ${PASSENGER_WEB_ORIGIN:-http://localhost:3200}
+      # Optional legacy alias; StripeGateway prefers STRIPE_SECRET_KEY (sk_test_…)
       PAYMENT_PROVIDER_KEY: ${PAYMENT_PROVIDER_KEY:-}
     depends_on:
       rabbitmq:

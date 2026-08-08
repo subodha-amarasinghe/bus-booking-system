@@ -36,7 +36,12 @@ export function usePayOnline() {
       userId: string;
       amount: number;
       currency: string;
-    }) => gatewayRequest<Payment>('/payments/online', { body: input }),
+      returnUrl?: string;
+      cancelUrl?: string;
+    }) =>
+      gatewayRequest<Payment & { checkoutUrl?: string }>('/payments/online', {
+        body: input,
+      }),
     onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: passengerQueryKeys.myBookings(),

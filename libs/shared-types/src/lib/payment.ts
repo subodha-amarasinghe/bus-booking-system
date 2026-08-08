@@ -40,10 +40,20 @@ export const ProcessOnlinePaymentRequestSchema = z.object({
   amount: z.number().positive(),
   currency: z.string().default('LKR'),
   provider: z.string().min(1).optional(),
+  /** Where Stripe should send the passenger after Checkout (success/cancel base). */
   returnUrl: z.string().url().optional(),
+  cancelUrl: z.string().url().optional(),
 });
 export type ProcessOnlinePaymentRequest = z.infer<
   typeof ProcessOnlinePaymentRequestSchema
+>;
+
+/** Online pay may return a hosted Checkout URL while the payment stays PENDING. */
+export const ProcessOnlinePaymentResponseSchema = PaymentSchema.extend({
+  checkoutUrl: z.string().url().optional(),
+});
+export type ProcessOnlinePaymentResponse = z.infer<
+  typeof ProcessOnlinePaymentResponseSchema
 >;
 
 export const RecordOfflinePaymentRequestSchema = z.object({

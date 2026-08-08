@@ -3,14 +3,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LoginRequestSchema, type LoginRequest } from '@bus-booking/shared-types';
 import { LogIn } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { AlertBanner } from '../../shared/components/AlertBanner';
 import { Spinner } from '../../shared/components/LoadingBlock';
 
 export function LoginForm({ next }: { next: string }) {
-  const router = useRouter();
   const [error, setError] = useState('');
   const {
     register,
@@ -33,8 +31,8 @@ export function LoginForm({ next }: { next: string }) {
       setError(body.message ?? 'We could not sign you in. Check your details.');
       return;
     }
-    router.replace(next);
-    router.refresh();
+    // Hard navigation so Set-Cookie applies and nested trip/search query is kept.
+    window.location.assign(next || '/');
   }
 
   return (

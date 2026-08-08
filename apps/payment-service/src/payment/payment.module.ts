@@ -3,6 +3,8 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { PaymentController } from './payment.controller';
 import { PaymentService } from './payment.service';
 import { PaymentRepository } from './payment.repository';
+import { StripeGateway } from './stripe.gateway';
+import { StripeWebhookController } from './stripe-webhook.controller';
 
 @Module({
   imports: [
@@ -18,7 +20,7 @@ import { PaymentRepository } from './payment.repository';
       },
     ]),
   ],
-  controllers: [PaymentController],
-  providers: [PaymentService, PaymentRepository],
+  controllers: [PaymentController, StripeWebhookController],
+  providers: [PaymentService, PaymentRepository, StripeGateway],
 })
 export class PaymentModule {}

@@ -1,17 +1,17 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { RegisterForm } from '../../../features/auth/register-form';
-import { getPassengerSession } from '../../../lib/auth';
-import { safeInternalPath } from '../../../lib/format';
+import { getPassengerSession, getReturnToCookie } from '../../../lib/auth';
+import { resolvePostAuthPath } from '../../../lib/format';
 
 export const metadata = { title: 'Create account · Bus Booking' };
 
 export default async function RegisterPage({
   searchParams,
 }: {
-  searchParams: { next?: string };
+  searchParams: { next?: string | string[] };
 }) {
-  const next = safeInternalPath(searchParams.next, '/');
+  const next = resolvePostAuthPath(searchParams.next, getReturnToCookie(), '/');
   const session = await getPassengerSession();
   if (session) redirect(next);
 

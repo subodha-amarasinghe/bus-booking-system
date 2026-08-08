@@ -17,25 +17,18 @@ import { StatusBadge } from '../../../../shared/components/StatusBadge';
 
 export const metadata = { title: 'Payment · Bus Booking' };
 
-/** Only same-origin or explicit https checkout URLs are embedded. */
-function safeCheckoutUrl(value: string | undefined): string | undefined {
-  if (!value) return undefined;
-  try {
-    const url = new URL(value);
-    return url.protocol === 'https:' || url.protocol === 'http:'
-      ? url.toString()
-      : undefined;
-  } catch {
-    return undefined;
-  }
-}
-
 export default async function PaymentPage({
   params,
   searchParams,
 }: {
   params: { bookingId: string };
-  searchParams: { checkoutUrl?: string; amount?: string; currency?: string; seats?: string };
+  searchParams: {
+    amount?: string;
+    currency?: string;
+    seats?: string;
+    status?: string;
+    session_id?: string;
+  };
 }) {
   const session = await getPassengerSession();
   if (!session) {
@@ -45,13 +38,17 @@ export default async function PaymentPage({
   }
 
   const booking = await getBookingById(params.bookingId);
-  const checkoutUrl = safeCheckoutUrl(searchParams.checkoutUrl);
+  const checkoutStatus = searchParams.status?.toLowerCase();
 
   const requestedAmount = Number(searchParams.amount);
+  const bookingFare =
+    booking?.fareAmount !== undefined && booking.fareAmount > 0
+      ? booking.fareAmount
+      : undefined;
   const amount =
     Number.isFinite(requestedAmount) && requestedAmount > 0
       ? requestedAmount
-      : booking?.fareAmount;
+      : bookingFare;
   const currency = searchParams.currency ?? booking?.currency ?? 'LKR';
   const seats = searchParams.seats?.split(',').filter(Boolean) ?? [];
 
@@ -63,6 +60,24 @@ export default async function PaymentPage({
         subtitle="Complete payment to lock in your seats for good."
         title="Payment"
       />
+
+      {checkoutStatus === 'success' && (
+        <AlertBanner tone="success">
+          Payment submitted. Stripe is confirming your charge — this page will
+          show as paid once the webhook lands. You can return to My bookings.
+          {searchParams.session_id ? (
+            <>
+              {' '}
+              Session <span className="font-mono text-xs">{searchParams.session_id}</span>
+            </>
+          ) : null}
+        </AlertBanner>
+      )}
+      {checkoutStatus === 'cancelled' && (
+        <AlertBanner>
+          Checkout was cancelled. You can try again whenever you are ready.
+        </AlertBanner>
+      )}
 
       <section className="ui-card space-y-3">
         <div className="flex flex-wrap items-start justify-between gap-3">
@@ -102,22 +117,17 @@ export default async function PaymentPage({
         </dl>
       </section>
 
-      {checkoutUrl ? (
-        <section className="ui-card space-y-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-            Secure checkout
-          </h2>
-          <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
-            <iframe
-              allow="payment"
-              className="h-[520px] w-full"
-              src={checkoutUrl}
-              title="Secure hosted payment checkout"
-            />
+      {checkoutStatus === 'success' ? (
+        <section className="ui-card space-y-4">
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Link className="ui-btn-primary min-h-[48px] w-full sm:w-auto" href="/bookings">
+              <Ticket aria-hidden="true" className="h-4 w-4" />
+              View my bookings
+            </Link>
+            <Link className="ui-btn-ghost min-h-[48px] w-full sm:w-auto" href="/search">
+              Book another trip
+            </Link>
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            Payment is handled by our provider in the frame above.
-          </p>
         </section>
       ) : amount === undefined ? (
         <EmptyState

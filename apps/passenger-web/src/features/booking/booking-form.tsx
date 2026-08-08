@@ -83,13 +83,20 @@ export function BookingForm({
         router.refresh();
         return;
       }
-      const payable = bookings.reduce(
+      const bookedTotal = bookings.reduce(
         (sum, booking) => sum + booking.fareAmount,
         0,
       );
+      // Prefer persisted fare; fall back to the trip fare shown on this form.
+      const payable =
+        bookedTotal > 0
+          ? bookedTotal
+          : fareAmount !== undefined
+            ? fareAmount * bookings.length
+            : 0;
       const params = new URLSearchParams({
         amount: String(payable),
-        currency: first.currency,
+        currency: first.currency || currency,
         seats: bookings.map((booking) => booking.seatNo).join(','),
       });
       // Replace so Back from payment skips the now-empty passenger-details step.

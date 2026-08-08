@@ -30,9 +30,11 @@ import { BookingRepository } from './booking.repository';
 const LOCK_TTL_SECONDS = 240;
 const IDEMPOTENCY_TTL_SECONDS = 86400;
 
-/** Shape of the `trip.get` reply, narrowed to what the seat map needs. */
+/** Shape of the `trip.get` reply, narrowed to what booking needs. */
 interface TripView {
   busId: string;
+  fareAmount: number;
+  currency: string;
 }
 
 /** Shape of the `seat.getLayoutByBus` reply after JSON transport. */
@@ -225,7 +227,22 @@ export class BookingService {
       throw new DomainException('Invalid or expired lock', 409, 'LOCK_INVALID');
     }
 
-    const fareAmount = 0;
+    const trip = await firstValueFrom(
+      this.busSeat.send<TripView | null>(TRIP_GET, { tripId: dto.tripId }),
+    );
+    if (!trip) {
+      throw new DomainException('Trip not found', 404, 'TRIP_NOT_FOUND');
+    }
+    if (!(trip.fareAmount > 0)) {
+      throw new DomainException(
+        'Trip fare is not configured',
+        422,
+        'TRIP_FARE_MISSING',
+      );
+    }
+
+    const fareAmount = trip.fareAmount;
+    const currency = trip.currency?.trim() || 'LKR';
     const confirmedAt = new Date();
     const booking = await this.repo.create({
       tripId: dto.tripId,
@@ -235,7 +252,7 @@ export class BookingService {
       passengerName: dto.passengerName,
       passengerPhone: dto.passengerPhone,
       fareAmount,
-      currency: 'LKR',
+      currency,
       lockToken: dto.lockToken,
       idempotencyKey: dto.idempotencyKey,
       confirmedAt,

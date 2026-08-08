@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
 import type { ApiError } from '@bus-booking/shared-types';
 import { DomainException } from '../exceptions/domain.exception';
 
@@ -14,9 +15,6 @@ export class DomainExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(DomainExceptionFilter.name);
 
   catch(exception: unknown, host: ArgumentsHost): void {
-    const ctx = host.switchToHttp();
-    const response = ctx.getResponse<{ status: (code: number) => { json: (body: unknown) => void } }>();
-
     let statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = 'Internal server error';
     let code: string | undefined;
@@ -39,6 +37,14 @@ export class DomainExceptionFilter implements ExceptionFilter {
     }
 
     const payload: ApiError = { statusCode, message, code };
+
+    if (host.getType() === 'rpc') {
+      throw new RpcException(payload);
+    }
+
+    const response = host.switchToHttp().getResponse<{
+      status: (code: number) => { json: (body: unknown) => void };
+    }>();
     response.status(statusCode).json(payload);
   }
 }
