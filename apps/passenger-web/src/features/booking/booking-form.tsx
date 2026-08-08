@@ -39,6 +39,7 @@ export function BookingForm({
   defaultPhone = '',
   fareAmount,
   currency = 'LKR',
+  seatMapHref,
 }: {
   tripId: string;
   userId: string;
@@ -46,11 +47,14 @@ export function BookingForm({
   defaultPhone?: string;
   fareAmount?: number;
   currency?: string;
+  /** Seat map URL with trip context query preserved for Back / empty state. */
+  seatMapHref?: string;
 }) {
   const router = useRouter();
   const draft = useBookingDraft(passengerApi);
   const remaining = useRemainingSeconds(draft.expiresAt);
   const [error, setError] = useState('');
+  const tripSeatsHref = seatMapHref ?? `/trips/${tripId}`;
   const {
     register,
     handleSubmit,
@@ -75,7 +79,8 @@ export function BookingForm({
       const bookings = await draft.confirm({ userId, ...values });
       const first = bookings[0];
       if (!first) {
-        router.push('/bookings');
+        router.replace('/bookings');
+        router.refresh();
         return;
       }
       const payable = bookings.reduce(
@@ -87,7 +92,9 @@ export function BookingForm({
         currency: first.currency,
         seats: bookings.map((booking) => booking.seatNo).join(','),
       });
-      router.push(`/payment/${first.bookingId}?${params.toString()}`);
+      // Replace so Back from payment skips the now-empty passenger-details step.
+      router.replace(`/payment/${first.bookingId}?${params.toString()}`);
+      router.refresh();
     } catch (reason) {
       setError(
         reason instanceof Error
@@ -101,7 +108,7 @@ export function BookingForm({
     return (
       <EmptyState
         action={
-          <Link className="ui-btn-primary min-h-[44px]" href={`/trips/${tripId}`}>
+          <Link className="ui-btn-primary min-h-[44px]" href={tripSeatsHref}>
             Choose seats
             <ArrowRight aria-hidden="true" className="h-4 w-4" />
           </Link>
@@ -119,7 +126,7 @@ export function BookingForm({
   return (
     <div className="space-y-4">
       <section className="ui-card space-y-4">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
           Your seats
         </h2>
         <ul className="flex flex-wrap gap-1.5">
@@ -130,11 +137,11 @@ export function BookingForm({
           ))}
         </ul>
         {total !== undefined && (
-          <dl className="flex items-center justify-between border-t border-slate-100 pt-3 text-sm">
-            <dt className="text-slate-500">
+          <dl className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-3 text-sm">
+            <dt className="text-slate-500 dark:text-slate-400">
               {draft.selectedSeats.length} × {formatMoney(fareAmount ?? 0, currency)}
             </dt>
-            <dd className="text-lg font-bold text-slate-900">
+            <dd className="text-lg font-bold text-slate-900 dark:text-slate-100">
               {formatMoney(total, currency)}
             </dd>
           </dl>
@@ -143,8 +150,8 @@ export function BookingForm({
           className={clsx(
             'flex items-center justify-between gap-3 rounded-xl border px-3 py-2.5',
             holdExpired || urgent
-              ? 'border-rose-200 bg-rose-50 text-rose-700'
-              : 'border-amber-200 bg-amber-50 text-amber-800',
+              ? 'border-rose-200 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/70 text-rose-700 dark:text-rose-200'
+              : 'border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/70 text-amber-800 dark:text-amber-200',
           )}
           role="status"
         >
@@ -164,13 +171,13 @@ export function BookingForm({
             Your hold expired, so these seats are back on sale. Pick them again to
             continue.
           </AlertBanner>
-          <Link className="ui-btn-primary min-h-[48px] w-full" href={`/trips/${tripId}`}>
+          <Link className="ui-btn-primary min-h-[48px] w-full" href={tripSeatsHref}>
             Back to seat map
           </Link>
         </div>
       ) : (
         <form className="ui-card space-y-4" onSubmit={handleSubmit(confirm)}>
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
             Passenger details
           </h2>
 
@@ -210,6 +217,17 @@ export function BookingForm({
             )}
           </div>
 
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            By confirming you agree that cancellations follow the{' '}
+            <Link
+              className="font-medium text-brand-700 dark:text-brand-300 underline-offset-2 hover:underline"
+              href="/cancellation-policy"
+            >
+              cancellation policy
+            </Link>
+            .
+          </p>
+
           {error && <AlertBanner>{error}</AlertBanner>}
 
           <button
@@ -222,7 +240,7 @@ export function BookingForm({
               ? 'Confirming…'
               : 'Confirm and continue to payment'}
           </button>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             One booking is created per seat. You pay on the next step.
           </p>
         </form>

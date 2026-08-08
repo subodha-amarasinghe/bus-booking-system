@@ -2,6 +2,7 @@
 
 import { CancellationRequestSchema } from '@bus-booking/shared-types';
 import { X } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { AlertBanner } from '../../shared/components/AlertBanner';
@@ -59,7 +60,7 @@ export function CancelBookingButton({
     return (
       <div className="space-y-2">
         <button
-          className="ui-btn-ghost min-h-[44px] text-rose-700 hover:bg-rose-50"
+          className="ui-btn-ghost min-h-[44px] text-rose-700 dark:text-rose-200 hover:bg-rose-50 dark:bg-rose-950/70"
           onClick={() => setConfirming(true)}
           type="button"
         >
@@ -72,9 +73,16 @@ export function CancelBookingButton({
   }
 
   return (
-    <div className="space-y-2 rounded-xl border border-rose-200 bg-rose-50 p-3">
-      <p className="text-sm font-medium text-rose-800">
-        Cancel seat {seatNo}? Refunds follow the fare rules for this trip.
+    <div className="space-y-2 rounded-xl border border-rose-200 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/70 p-3">
+      <p className="text-sm font-medium text-rose-800 dark:text-rose-200">
+        Cancel seat {seatNo}? Your refund follows the{' '}
+        <Link
+          className="underline underline-offset-2 hover:text-rose-950"
+          href="/cancellation-policy"
+        >
+          cancellation policy
+        </Link>
+        .
       </p>
       {error && <AlertBanner>{error}</AlertBanner>}
       <div className="flex flex-col gap-2 sm:flex-row">

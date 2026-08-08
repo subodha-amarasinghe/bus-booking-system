@@ -10,28 +10,35 @@
   }
 
   body {
-    @apply bg-slate-50 text-slate-900 font-sans;
+    @apply bg-slate-50 font-sans text-slate-900 dark:bg-slate-950 dark:text-slate-100;
+  }
+
+  ::selection {
+    @apply bg-brand-200 text-brand-950 dark:bg-brand-700 dark:text-white;
   }
 }
 
 @layer components {
   .ui-card {
-    @apply rounded-2xl border border-slate-200 bg-white p-5 shadow-soft;
+    @apply rounded-2xl border border-slate-200 bg-white p-5 shadow-soft
+      dark:border-slate-700 dark:bg-slate-900 dark:shadow-soft-dark;
   }
 
   .ui-label {
-    @apply mb-1.5 block text-sm font-medium text-slate-600;
+    @apply mb-1.5 block text-sm font-medium text-slate-600 dark:text-slate-300;
   }
 
   .ui-input {
     @apply block w-full rounded-xl border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm
       placeholder:text-slate-400
-      focus:border-brand-500 focus:ring-brand-500;
+      focus:border-brand-500 focus:ring-brand-500
+      dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500;
   }
 
   .ui-select {
     @apply block w-full rounded-xl border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm
-      focus:border-brand-500 focus:ring-brand-500;
+      focus:border-brand-500 focus:ring-brand-500
+      dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100;
   }
 
   .ui-btn {
@@ -45,11 +52,13 @@
   }
 
   .ui-btn-secondary {
-    @apply ui-btn bg-brand-50 text-brand-700 hover:bg-brand-100 focus-visible:outline-brand-500;
+    @apply ui-btn bg-brand-50 text-brand-700 hover:bg-brand-100 focus-visible:outline-brand-500
+      dark:bg-brand-950 dark:text-brand-200 dark:hover:bg-brand-900;
   }
 
   .ui-btn-ghost {
-    @apply ui-btn bg-transparent text-slate-700 hover:bg-slate-100 focus-visible:outline-slate-400;
+    @apply ui-btn bg-transparent text-slate-700 hover:bg-slate-100 focus-visible:outline-slate-400
+      dark:text-slate-200 dark:hover:bg-slate-800;
   }
 
   .ui-btn-danger {
@@ -61,11 +70,13 @@
   }
 
   .ui-alert-error {
-    @apply rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700;
+    @apply rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700
+      dark:border-rose-900 dark:bg-rose-950/70 dark:text-rose-200;
   }
 
   .ui-alert-success {
-    @apply rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700;
+    @apply rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700
+      dark:border-emerald-900 dark:bg-emerald-950/70 dark:text-emerald-200;
   }
 
   .seat-btn {
@@ -73,7 +84,8 @@
   }
 
   .seat-available {
-    @apply seat-btn border-emerald-300 bg-emerald-50 text-emerald-800 hover:border-brand-500 hover:bg-brand-50;
+    @apply seat-btn border-emerald-300 bg-emerald-50 text-emerald-800 hover:border-brand-500 hover:bg-brand-50
+      dark:border-emerald-700 dark:bg-emerald-950 dark:text-emerald-200 dark:hover:border-brand-400 dark:hover:bg-brand-950;
   }
 
   .seat-selected {
@@ -81,11 +93,13 @@
   }
 
   .seat-locked {
-    @apply seat-btn cursor-not-allowed border-amber-300 bg-amber-50 text-amber-700;
+    @apply seat-btn cursor-not-allowed border-amber-300 bg-amber-50 text-amber-700
+      dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200;
   }
 
   .seat-booked,
   .seat-unavailable {
-    @apply seat-btn cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400;
+    @apply seat-btn cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400
+      dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500;
   }
 }

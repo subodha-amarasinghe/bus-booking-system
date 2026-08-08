@@ -12,13 +12,13 @@ export function LogoutButton() {
   async function logout() {
     setPending(true);
     await fetch('/api/auth/logout', { method: 'POST' }).catch(() => undefined);
-    router.replace('/login');
+    router.replace('/');
     router.refresh();
   }
 
   return (
     <button
-      className="ui-btn-ghost min-h-[48px] w-full border border-slate-200 sm:w-auto"
+      className="ui-btn-ghost min-h-[48px] w-full border border-slate-200 dark:border-slate-700 sm:w-auto"
       disabled={pending}
       onClick={logout}
       type="button"

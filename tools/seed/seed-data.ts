@@ -167,12 +167,13 @@ export const buses = [
     id: '30000000-0000-4000-8000-000000000001',
     plateNumber: 'NA-1234',
     name: 'Standard Intercity 2×3',
-    capacity: 56,
+    capacity: 54,
     operatorId: 'operator-lanka-express',
     regularRows: 10,
     leftSeats: 2,
     rightSeats: 3,
     rearSeats: 6,
+    secondDoorRow: true,
   },
   {
     id: '30000000-0000-4000-8000-000000000002',
@@ -184,6 +185,7 @@ export const buses = [
     leftSeats: 2,
     rightSeats: 2,
     rearSeats: 5,
+    secondDoorRow: false,
   },
   {
     id: '30000000-0000-4000-8000-000000000003',
@@ -195,6 +197,19 @@ export const buses = [
     leftSeats: 2,
     rightSeats: 2,
     rearSeats: 5,
+    secondDoorRow: false,
+  },
+  {
+    id: '30000000-0000-4000-8000-000000000004',
+    plateNumber: 'ND-2840',
+    name: 'Mini AC Coaster',
+    capacity: 28,
+    operatorId: 'operator-southern-lines',
+    regularRows: 6,
+    leftSeats: 2,
+    rightSeats: 2,
+    rearSeats: 4,
+    secondDoorRow: false,
   },
 ];
 
@@ -210,33 +225,48 @@ export interface SeedSeat {
  * Builds real coach geometry: regular rows skip a physical aisle column and
  * the solid rear bench fills it. Seat numbers are sequential integers from the
  * front of the bus (1…N), never row+letter labels.
+ *
+ * Two-door Layout A coaches omit the driver-side seats on the last regular
+ * row so the second door bay stays clear (matching 54-seat intercity maps).
  */
 export function buildSeats(configuration: {
   regularRows: number;
   leftSeats: number;
   rightSeats: number;
   rearSeats: number;
+  secondDoorRow?: boolean;
 }): SeedSeat[] {
-  const capacity =
-    configuration.regularRows *
-      (configuration.leftSeats + configuration.rightSeats) +
-    configuration.rearSeats;
+  const seatsPerFullRow = configuration.leftSeats + configuration.rightSeats;
+  const capacity = configuration.secondDoorRow
+    ? Math.max(0, configuration.regularRows - 1) * seatsPerFullRow +
+      configuration.rightSeats +
+      configuration.rearSeats
+    : configuration.regularRows * seatsPerFullRow + configuration.rearSeats;
   if (capacity > 59) {
     throw new Error('A seat map cannot have more than 59 seats.');
   }
 
   const seats: SeedSeat[] = [];
-  const seatsPerRow = configuration.leftSeats + configuration.rightSeats;
+  const doorRowIndex = configuration.secondDoorRow
+    ? configuration.regularRows - 1
+    : -1;
   let seatNo = 1;
 
   for (let row = 0; row < configuration.regularRows; row += 1) {
-    for (let ordinal = 0; ordinal < seatsPerRow; ordinal += 1) {
-      const onRight = ordinal >= configuration.leftSeats;
-      const column = onRight ? ordinal + 1 : ordinal;
-      const isWindow = ordinal === 0 || ordinal === seatsPerRow - 1;
+    const isDoorRow = row === doorRowIndex;
+    const leftInRow = isDoorRow ? 0 : configuration.leftSeats;
+    const seatsInRow = leftInRow + configuration.rightSeats;
+
+    for (let ordinal = 0; ordinal < seatsInRow; ordinal += 1) {
+      const onRight = ordinal >= leftInRow;
+      const column = isDoorRow
+        ? configuration.leftSeats + 1 + ordinal
+        : onRight
+          ? ordinal + 1
+          : ordinal;
+      const isWindow = ordinal === 0 || ordinal === seatsInRow - 1;
       const isAisle =
-        ordinal === configuration.leftSeats - 1 ||
-        ordinal === configuration.leftSeats;
+        leftInRow > 0 && (ordinal === leftInRow - 1 || ordinal === leftInRow);
       seats.push({
         seatNo,
         row,
@@ -331,6 +361,17 @@ export const trips = [
     fareAmount: 3800,
     currency: 'LKR',
     availableSeats: buses[1].capacity,
+    status: 'SCHEDULED',
+  },
+  {
+    id: '50000000-0000-4000-8000-000000000006',
+    busId: buses[3].id,
+    routeId: routes[3].id,
+    departureAt: at(1, 10),
+    arrivalAt: at(1, 11),
+    fareAmount: 450,
+    currency: 'LKR',
+    availableSeats: buses[3].capacity,
     status: 'SCHEDULED',
   },
 ];
@@ -459,6 +500,38 @@ export const refunds = [
     status: 'COMPLETED',
     reason: 'Cancelled more than 24h before departure',
     processedAt: new Date(),
+  },
+];
+
+export const cancellationPolicies = [
+  {
+    id: 'a1000000-0000-4000-8000-000000000001',
+    name: 'Cancellation & Refund Policy',
+    description:
+      'Cancellations must be made at least 6 hours prior to the scheduled journey start time. Refunds will be processed based on the time of cancellation as follows:',
+    rules: [
+      {
+        minHoursBeforeDeparture: 12,
+        deductionAmount: 300,
+        label: 'More than 12 hours before departure',
+        outcome: 'Refund after deducting LKR 300 per seat.',
+      },
+      {
+        minHoursBeforeDeparture: 6,
+        deductionAmount: 350,
+        label: 'Between 12 to 6 hours before departure',
+        outcome: 'Refund after deducting LKR 350 per seat.',
+      },
+      {
+        minHoursBeforeDeparture: 0,
+        noRefund: true,
+        label: 'Less than 6 hours before departure',
+        outcome: 'No refund.',
+        notes:
+          'One-time rescheduling available within 30 days, subject to seat availability.',
+      },
+    ],
+    isActive: true,
   },
 ];
 

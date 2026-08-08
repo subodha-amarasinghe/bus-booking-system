@@ -20,7 +20,7 @@ export function LoadingBlock({
       <span className="sr-only">{label}</span>
       {Array.from({ length: rows }, (_, index) => (
         <div
-          className="h-4 animate-pulse rounded-full bg-slate-200"
+          className="h-4 animate-pulse rounded-full bg-slate-200 dark:bg-slate-700"
           key={index}
           style={{ width: `${100 - index * 12}%` }}
         />

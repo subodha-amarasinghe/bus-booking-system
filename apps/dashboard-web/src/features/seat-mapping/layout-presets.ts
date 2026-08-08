@@ -1,7 +1,11 @@
 import type { SaveSeatLayoutRequest } from '@bus-booking/shared-types';
 
 export type SeatDraft = SaveSeatLayoutRequest['seats'][number];
-export type LayoutPresetId = 'STANDARD_2_X_3' | 'LUXURY_2_X_2' | 'CUSTOM';
+export type LayoutPresetId =
+  | 'STANDARD_2_X_3'
+  | 'LUXURY_2_X_2'
+  | 'MINI_2_X_2'
+  | 'CUSTOM';
 
 export interface LayoutConfiguration {
   preset: LayoutPresetId;
@@ -9,6 +13,11 @@ export interface LayoutConfiguration {
   leftSeats: number;
   rightSeats: number;
   rearSeats: number;
+  /**
+   * Two-door coaches leave the driver-side empty on the last regular row
+   * (the bay above the rear bench) so the second door can open.
+   */
+  secondDoorRow: boolean;
 }
 
 export interface LayoutPreset {
@@ -26,7 +35,8 @@ export const LAYOUT_PRESETS: LayoutPreset[] = [
     id: 'STANDARD_2_X_3',
     name: 'Layout A — Standard intercity',
     shortName: '2 × 3',
-    description: 'Two seats on the driver side and three on the door side.',
+    description:
+      'Two seats on the driver side and three on the door side. Two-door coach: the 10th row leaves the left side empty.',
     usage: 'Standard, non-AC and semi-luxury intercity buses',
     capacityGuide: 'Typically 54–59 seats',
     configuration: {
@@ -35,6 +45,7 @@ export const LAYOUT_PRESETS: LayoutPreset[] = [
       leftSeats: 2,
       rightSeats: 3,
       rearSeats: 6,
+      secondDoorRow: true,
     },
   },
   {
@@ -50,6 +61,24 @@ export const LAYOUT_PRESETS: LayoutPreset[] = [
       leftSeats: 2,
       rightSeats: 2,
       rearSeats: 5,
+      secondDoorRow: false,
+    },
+  },
+  {
+    id: 'MINI_2_X_2',
+    name: 'Layout C — Mini AC',
+    shortName: '2 × 2 Mini',
+    description:
+      'Compact 2×2 cabin for Mitsubishi Rosa, Toyota Coaster and similar mini AC buses.',
+    usage: 'Mini AC coaches (Rosa, Coaster and similar)',
+    capacityGuide: 'Typically 20–29 seats',
+    configuration: {
+      preset: 'MINI_2_X_2',
+      regularRows: 6,
+      leftSeats: 2,
+      rightSeats: 2,
+      rearSeats: 4,
+      secondDoorRow: false,
     },
   },
 ];
@@ -57,9 +86,17 @@ export const LAYOUT_PRESETS: LayoutPreset[] = [
 export const DEFAULT_LAYOUT_CONFIGURATION = LAYOUT_PRESETS[1].configuration;
 
 export function layoutCapacity(configuration: LayoutConfiguration): number {
+  const seatsPerFullRow = configuration.leftSeats + configuration.rightSeats;
+  if (!configuration.secondDoorRow) {
+    return (
+      configuration.regularRows * seatsPerFullRow + configuration.rearSeats
+    );
+  }
+
+  const fullRows = Math.max(0, configuration.regularRows - 1);
   return (
-    configuration.regularRows *
-      (configuration.leftSeats + configuration.rightSeats) +
+    fullRows * seatsPerFullRow +
+    configuration.rightSeats +
     configuration.rearSeats
   );
 }
@@ -102,22 +139,30 @@ export function buildConfiguredSeats(
 
   const seats: SeatDraft[] = [];
   const regularSeatCount = configuration.leftSeats + configuration.rightSeats;
+  const doorRowIndex = configuration.secondDoorRow
+    ? configuration.regularRows - 1
+    : -1;
   let seatNo = 1;
 
   for (let row = 0; row < configuration.regularRows; row += 1) {
-    for (let ordinal = 0; ordinal < regularSeatCount; ordinal += 1) {
-      const onRight = ordinal >= configuration.leftSeats;
-      const column = onRight ? ordinal + 1 : ordinal;
+    const isDoorRow = row === doorRowIndex;
+    const leftInRow = isDoorRow ? 0 : configuration.leftSeats;
+    const seatsInRow = leftInRow + configuration.rightSeats;
+
+    for (let ordinal = 0; ordinal < seatsInRow; ordinal += 1) {
+      const onRight = ordinal >= leftInRow;
+      // Keep door-side seats aligned to the right of the aisle even when the
+      // left bay is empty for the second door.
+      const column = isDoorRow
+        ? configuration.leftSeats + 1 + ordinal
+        : onRight
+          ? ordinal + 1
+          : ordinal;
       seats.push({
         seatNo,
         row,
         column,
-        type: seatType(
-          ordinal,
-          regularSeatCount,
-          false,
-          configuration.leftSeats,
-        ),
+        type: seatType(ordinal, seatsInRow, false, leftInRow),
         isAvailable: true,
       });
       seatNo += 1;
@@ -156,6 +201,10 @@ export function inferLayoutConfiguration(
   const regularRow = layout.seats
     .filter((seat) => seat.row === 0)
     .sort((a, b) => a.column - b.column);
+  const lastRegularRowIndex = layout.rows - 2;
+  const lastRegularSeats = layout.seats
+    .filter((seat) => seat.row === lastRegularRowIndex)
+    .sort((a, b) => a.column - b.column);
   const rearSeats = layout.seats.filter(
     (seat) => seat.row === layout.rows - 1,
   ).length;
@@ -166,18 +215,27 @@ export function inferLayoutConfiguration(
   const leftSeats =
     gapAt > 0 ? gapAt : Math.max(1, Math.floor(regularRow.length / 2));
   const rightSeats = Math.max(1, regularRow.length - leftSeats);
+  const secondDoorRow =
+    lastRegularRowIndex >= 0 &&
+    lastRegularSeats.length > 0 &&
+    lastRegularSeats.length < regularRow.length &&
+    lastRegularSeats[0].column >= leftSeats;
+  const regularRows = Math.max(1, layout.rows - 1);
   const preset =
     leftSeats === 2 && rightSeats === 3
       ? 'STANDARD_2_X_3'
-      : leftSeats === 2 && rightSeats === 2
-        ? 'LUXURY_2_X_2'
-        : 'CUSTOM';
+      : leftSeats === 2 && rightSeats === 2 && regularRows <= 7
+        ? 'MINI_2_X_2'
+        : leftSeats === 2 && rightSeats === 2
+          ? 'LUXURY_2_X_2'
+          : 'CUSTOM';
 
   return {
     preset,
-    regularRows: Math.max(1, layout.rows - 1),
+    regularRows,
     leftSeats,
     rightSeats,
     rearSeats: Math.max(1, rearSeats),
+    secondDoorRow,
   };
 }

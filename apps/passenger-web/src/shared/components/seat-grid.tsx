@@ -62,7 +62,7 @@ export function SeatGrid({
       <div className="mx-auto flex w-fit flex-col gap-2">
         {rows.map(({ rowNumber, seats: row }) => (
           <div className="flex items-center gap-2" key={rowNumber}>
-            <span className="w-5 shrink-0 text-right text-xs font-medium text-slate-400">
+            <span className="w-5 shrink-0 text-right text-xs font-medium text-slate-400 dark:text-slate-500">
               {rowNumber + 1}
             </span>
             <div
@@ -104,8 +104,8 @@ export function SeatGrid({
 const LEGEND: ReadonlyArray<{ label: string; className: string }> = [
   { label: 'Available', className: 'border-emerald-300 bg-emerald-50' },
   { label: 'Selected', className: 'border-brand-600 bg-brand-600' },
-  { label: 'Locked', className: 'border-amber-300 bg-amber-50' },
-  { label: 'Booked', className: 'border-slate-200 bg-slate-100' },
+  { label: 'Locked', className: 'border-amber-300 bg-amber-50 dark:bg-amber-950/70' },
+  { label: 'Booked', className: 'border-slate-200 dark:border-slate-700 bg-slate-100' },
 ];
 
 export function SeatLegend() {
@@ -113,7 +113,7 @@ export function SeatLegend() {
     <ul className="flex flex-wrap gap-x-4 gap-y-2">
       {LEGEND.map((item) => (
         <li
-          className="flex items-center gap-1.5 text-xs font-medium text-slate-600"
+          className="flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-300"
           key={item.label}
         >
           <span

@@ -4,12 +4,22 @@ import {
   BOOKING_CONFIRMED,
   CANCELLATION_COMPLETED,
 } from '@bus-booking/shared-events';
-import { RefundStatus } from '@bus-booking/shared-types';
+import {
+  CancellationPolicyRuleSchema,
+  RefundStatus,
+  resolveRefundAmount,
+} from '@bus-booking/shared-types';
 import type {
   CalculateRefundRequest,
+  CancellationPolicy,
+  CancellationPolicyRule,
   CancellationRequest,
+  UpsertCancellationPolicyRequest,
 } from '@bus-booking/shared-types';
+import type { CancellationPolicy as PolicyRow, Prisma } from '../generated/prisma/client';
 import { ModificationRepository } from './modification.repository';
+
+const STUB_FARE_AMOUNT = 1000;
 
 @Injectable()
 export class ModificationService {
@@ -28,7 +38,7 @@ export class ModificationService {
       status: 'REQUESTED',
     });
 
-    const refundCalc = this.calculateRefund({
+    const refundCalc = await this.calculateRefund({
       bookingId: dto.bookingId,
       cancellationAt: new Date(),
     });
@@ -62,20 +72,83 @@ export class ModificationService {
     return { cancellation, refund };
   }
 
-  calculateRefund(dto: CalculateRefundRequest): {
+  async calculateRefund(dto: CalculateRefundRequest): Promise<{
     bookingId: string;
     amount: number;
     currency: string;
     percentage: number;
-  } {
-    // Stub policy: 80% refund if cancelled more than 2h before departure (unknown here)
-    const percentage = 80;
-    const amount = 1000 * (percentage / 100);
+    deductionAmount: number;
+  }> {
+    const policy = await this.getActivePolicy();
+    const rules = policy?.rules ?? [
+      {
+        minHoursBeforeDeparture: 12,
+        deductionAmount: 300,
+        label: 'More than 12 hours before departure',
+      },
+      {
+        minHoursBeforeDeparture: 6,
+        deductionAmount: 350,
+        label: 'Between 12 to 6 hours before departure',
+      },
+      {
+        minHoursBeforeDeparture: 0,
+        noRefund: true,
+        label: 'Less than 6 hours before departure',
+      },
+    ];
+
+    // Without a known departure, assume the most generous qualifying tier
+    // (highest threshold) so early cancellations are not under-quoted.
+    const hours =
+      dto.hoursBeforeDeparture ??
+      Math.max(...rules.map((rule) => rule.minHoursBeforeDeparture), 0);
+
+    const fareAmount = dto.fareAmount ?? STUB_FARE_AMOUNT;
+    const resolved = resolveRefundAmount(rules, hours, fareAmount);
+
     return {
       bookingId: dto.bookingId,
-      amount,
+      amount: resolved.amount,
       currency: 'LKR',
-      percentage,
+      percentage: resolved.percentage,
+      deductionAmount: resolved.deductionAmount,
+    };
+  }
+
+  async getActivePolicy(): Promise<CancellationPolicy | null> {
+    const row = await this.repo.findActivePolicy();
+    return row ? this.toPolicy(row) : null;
+  }
+
+  async upsertPolicy(
+    dto: UpsertCancellationPolicyRequest,
+  ): Promise<CancellationPolicy> {
+    const rules = [...dto.rules].sort(
+      (a, b) => b.minHoursBeforeDeparture - a.minHoursBeforeDeparture,
+    );
+    const row = await this.repo.upsertPolicy({
+      id: dto.id,
+      name: dto.name,
+      description: dto.description,
+      rules: rules as unknown as Prisma.InputJsonValue,
+      isActive: dto.isActive,
+    });
+    return this.toPolicy(row);
+  }
+
+  private toPolicy(row: PolicyRow): CancellationPolicy {
+    const parsed = CancellationPolicyRuleSchema.array().safeParse(row.rules);
+    const rules: CancellationPolicyRule[] = parsed.success ? parsed.data : [];
+
+    return {
+      id: row.id,
+      name: row.name,
+      description: row.description ?? undefined,
+      rules,
+      isActive: row.isActive,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
     };
   }
 

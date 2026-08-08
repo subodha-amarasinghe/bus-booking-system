@@ -70,7 +70,7 @@ export function RouteMapCard({ routeId }: { routeId: string }) {
     <section className="ui-card space-y-4">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="inline-flex items-center gap-2 text-sm font-semibold text-brand-700">
+          <p className="inline-flex items-center gap-2 text-sm font-semibold text-brand-700 dark:text-brand-300">
             <MapPinned className="h-4 w-4" aria-hidden />
             Route {route.routeNumber ?? ''}
           </p>
@@ -78,7 +78,7 @@ export function RouteMapCard({ routeId }: { routeId: string }) {
             {route.name}
           </h2>
         </div>
-        <p className="shrink-0 text-right text-xs font-medium text-slate-500">
+        <p className="shrink-0 text-right text-xs font-medium text-slate-500 dark:text-slate-400">
           {route.distanceKm != null ? `${route.distanceKm} km` : ''}
           {route.estimatedDurationMin != null
             ? ` · ~${route.estimatedDurationMin} min`

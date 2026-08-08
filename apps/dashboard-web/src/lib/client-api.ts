@@ -52,4 +52,5 @@ export const queryKeys = {
   locations: ['locations'] as const,
   routes: ['routes'] as const,
   trips: (filters: unknown) => ['trips', filters] as const,
+  cancellationPolicy: ['cancellation-policy'] as const,
 };

@@ -10,4 +10,5 @@
  */
 export type * from './models/Cancellation.js'
 export type * from './models/Refund.js'
+export type * from './models/CancellationPolicy.js'
 export type * from './commonInputTypes.js'

@@ -24,6 +24,8 @@ import { formatMoney } from '../../lib/format';
 
 const RefundQuoteFormSchema = CalculateRefundRequestSchema.pick({
   bookingId: true,
+  hoursBeforeDeparture: true,
+  fareAmount: true,
 });
 
 /** The gateway fills these in from defaults; the form always sends a value. */
@@ -47,6 +49,7 @@ interface RefundQuote {
   amount: number;
   currency: string;
   percentage: number;
+  deductionAmount?: number;
 }
 
 const METHOD_LABELS: Record<string, string> = {
@@ -198,6 +201,55 @@ function RefundQuoteForm() {
           />
         </Field>
 
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Field
+            label="Hours before departure"
+            htmlFor="quoteHours"
+            hint="Optional — uses the best policy tier when blank."
+            error={
+              errors.hoursBeforeDeparture
+                ? 'Enter 0 or more hours.'
+                : undefined
+            }
+          >
+            <input
+              id="quoteHours"
+              type="number"
+              min={0}
+              step="any"
+              className="ui-input"
+              placeholder="48"
+              {...register('hoursBeforeDeparture', {
+                setValueAs: (value) =>
+                  value === '' || value === null || Number.isNaN(Number(value))
+                    ? undefined
+                    : Number(value),
+              })}
+            />
+          </Field>
+          <Field
+            label="Fare amount"
+            htmlFor="quoteFare"
+            hint="Optional — defaults to a stub fare."
+            error={errors.fareAmount ? 'Enter a fare of 0 or more.' : undefined}
+          >
+            <input
+              id="quoteFare"
+              type="number"
+              min={0}
+              step="any"
+              className="ui-input"
+              placeholder="1500"
+              {...register('fareAmount', {
+                setValueAs: (value) =>
+                  value === '' || value === null || Number.isNaN(Number(value))
+                    ? undefined
+                    : Number(value),
+              })}
+            />
+          </Field>
+        </div>
+
         {calculate.isError ? (
           <ErrorAlert message={errorMessage(calculate.error)} />
         ) : null}
@@ -212,6 +264,14 @@ function RefundQuoteForm() {
               </dd>
             </div>
             <div>
+              <dt className="text-xs uppercase tracking-wide text-slate-400">
+                Deduction
+              </dt>
+              <dd className="text-lg font-semibold text-slate-900">
+                {formatMoney(quote.deductionAmount ?? 0, quote.currency)}
+              </dd>
+            </div>
+            <div className="col-span-2">
               <dt className="text-xs uppercase tracking-wide text-slate-400">
                 Share of fare
               </dt>

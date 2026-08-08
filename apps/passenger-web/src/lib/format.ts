@@ -58,8 +58,32 @@ export function shiftDateInputValue(value: string, days: number): string {
   return toDateInputValue(parsed);
 }
 
-/** Guards `?next=` redirects so only in-app paths are followed. */
+/** Guards `?next=` redirects so only in-app paths (with optional query) are followed. */
 export function safeInternalPath(value: string | undefined, fallback: string): string {
   if (!value || !value.startsWith('/') || value.startsWith('//')) return fallback;
   return value;
+}
+
+/** Builds `/login?next=…` preserving path + query for post-auth return. */
+export function buildLoginHref(returnTo: string): string {
+  return `/login?next=${encodeURIComponent(safeInternalPath(returnTo, '/'))}`;
+}
+
+/** Reconstructs pathname + search from App Router `searchParams`. */
+export function pathWithSearch(
+  pathname: string,
+  searchParams?: Record<string, string | string[] | undefined>,
+): string {
+  if (!searchParams) return pathname;
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(searchParams)) {
+    if (value === undefined) continue;
+    if (Array.isArray(value)) {
+      for (const item of value) query.append(key, item);
+    } else {
+      query.set(key, value);
+    }
+  }
+  const serialized = query.toString();
+  return serialized ? `${pathname}?${serialized}` : pathname;
 }

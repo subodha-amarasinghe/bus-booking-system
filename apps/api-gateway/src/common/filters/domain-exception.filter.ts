@@ -20,6 +20,7 @@ export class DomainExceptionFilter implements ExceptionFilter {
     let statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = 'Internal server error';
     let code: string | undefined;
+    let details: unknown;
 
     if (exception instanceof DomainException) {
       statusCode = exception.statusCode;
@@ -28,17 +29,27 @@ export class DomainExceptionFilter implements ExceptionFilter {
     } else if (exception instanceof HttpException) {
       statusCode = exception.getStatus();
       const body = exception.getResponse();
-      message =
-        typeof body === 'string'
-          ? body
-          : ((body as { message?: string | string[] }).message?.toString() ??
-            exception.message);
+      if (typeof body === 'string') {
+        message = body;
+      } else if (body && typeof body === 'object') {
+        const payload = body as {
+          message?: string | string[];
+          errors?: unknown;
+          details?: unknown;
+        };
+        message = Array.isArray(payload.message)
+          ? payload.message.join(', ')
+          : (payload.message ?? exception.message);
+        details = payload.errors ?? payload.details;
+      } else {
+        message = exception.message;
+      }
     } else if (exception instanceof Error) {
       message = exception.message;
       this.logger.error(exception.message, exception.stack);
     }
 
-    const payload: ApiError = { statusCode, message, code };
+    const payload: ApiError = { statusCode, message, code, details };
     response.status(statusCode).json(payload);
   }
 }

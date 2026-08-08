@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import type { Cancellation, Refund } from '../generated/prisma/client';
+import type {
+  Cancellation,
+  CancellationPolicy,
+  Prisma,
+  Refund,
+} from '../generated/prisma/client';
 
 @Injectable()
 export class ModificationRepository {
@@ -34,5 +39,63 @@ export class ModificationRepository {
     processedAt?: Date;
   }): Promise<Refund> {
     return this.prisma.refund.create({ data });
+  }
+
+  findActivePolicy(): Promise<CancellationPolicy | null> {
+    return this.prisma.cancellationPolicy.findFirst({
+      where: { isActive: true },
+      orderBy: { updatedAt: 'desc' },
+    });
+  }
+
+  findPolicyById(id: string): Promise<CancellationPolicy | null> {
+    return this.prisma.cancellationPolicy.findUnique({ where: { id } });
+  }
+
+  async upsertPolicy(data: {
+    id?: string;
+    name: string;
+    description?: string | null;
+    rules: Prisma.InputJsonValue;
+    isActive: boolean;
+  }): Promise<CancellationPolicy> {
+    return this.prisma.$transaction(async (tx) => {
+      if (data.isActive) {
+        await tx.cancellationPolicy.updateMany({
+          where: {
+            isActive: true,
+            ...(data.id ? { NOT: { id: data.id } } : {}),
+          },
+          data: { isActive: false },
+        });
+      }
+
+      if (data.id) {
+        const existing = await tx.cancellationPolicy.findUnique({
+          where: { id: data.id },
+        });
+        if (existing) {
+          return tx.cancellationPolicy.update({
+            where: { id: data.id },
+            data: {
+              name: data.name,
+              description: data.description ?? null,
+              rules: data.rules,
+              isActive: data.isActive,
+            },
+          });
+        }
+      }
+
+      return tx.cancellationPolicy.create({
+        data: {
+          ...(data.id ? { id: data.id } : {}),
+          name: data.name,
+          description: data.description ?? null,
+          rules: data.rules,
+          isActive: data.isActive,
+        },
+      });
+    });
   }
 }

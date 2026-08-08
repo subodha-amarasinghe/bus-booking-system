@@ -198,10 +198,10 @@ function SeatMappingEditor() {
     <div className="space-y-6">
       <SectionCard
         title="Choose a layout"
-        description="Start with a Sri Lankan intercity coach pattern, then adjust it for the vehicle."
+        description="Start with a Sri Lankan coach pattern — intercity, luxury, or mini AC — then adjust it for the vehicle."
         icon={Sparkles}
       >
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {LAYOUT_PRESETS.map((preset) => {
             const selected = configuration.preset === preset.id;
             const capacity = layoutCapacity(preset.configuration);
@@ -239,7 +239,7 @@ function SeatMappingEditor() {
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-slate-400">uide</dt>
+                    <dt className="text-slate-400">Capacity guide</dt>
                     <dd className="mt-0.5 font-semibold text-slate-700">
                       {preset.capacityGuide}
                     </dd>
@@ -373,11 +373,34 @@ function SeatMappingEditor() {
               />
             </Field>
 
+            <label className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm">
+              <input
+                checked={configuration.secondDoorRow}
+                className="mt-1 h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                onChange={(event) =>
+                  updateConfiguration({
+                    secondDoorRow: event.target.checked,
+                  })
+                }
+                type="checkbox"
+              />
+              <span>
+                <span className="font-medium text-slate-900">
+                  Two-door coach
+                </span>
+                <span className="mt-0.5 block text-xs text-slate-500">
+                  Leave the driver side empty on the last regular row so the
+                  second door can open.
+                </span>
+              </span>
+            </label>
+
             <dl className="rounded-xl bg-slate-50 px-3 py-2.5 text-sm">
               <div className="flex items-center justify-between">
                 <dt className="text-slate-500">Pattern</dt>
                 <dd className="font-medium text-slate-900">
                   {configuration.leftSeats} × {configuration.rightSeats}
+                  {configuration.secondDoorRow ? ' · 2-door' : ''}
                 </dd>
               </div>
               <div className="mt-1 flex items-center justify-between">
@@ -524,7 +547,7 @@ export function SeatMappingPage() {
     <>
       <PageHeader
         title="Seat layout configuration"
-        description="Configure standard 2×3 and luxury 2×2 coaches, including the solid rear bench passengers see when booking."
+        description="Configure standard 2×3, luxury 2×2 and mini AC (Rosa / Coaster) coaches, including the solid rear bench passengers see when booking."
         icon={Armchair}
       />
       <RequireRole

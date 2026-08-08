@@ -2,7 +2,13 @@ import { redirect } from 'next/navigation';
 import { SeatMapClient } from '../../../../features/seat-selection/seat-map-client';
 import { RouteMapCard } from '../../../../features/route-map/route-map-card';
 import { getPassengerSession } from '../../../../lib/auth';
-import { formatDateTime, formatMoney } from '../../../../lib/format';
+import {
+  buildLoginHref,
+  formatDateTime,
+  formatMoney,
+  pathWithSearch,
+  safeInternalPath,
+} from '../../../../lib/format';
 import { PageHeader } from '../../../../shared/components/PageHeader';
 
 export const metadata = { title: 'Choose your seats · Bus Booking' };
@@ -27,10 +33,15 @@ export default async function TripPage({
     fare?: string;
     currency?: string;
     departureAt?: string;
+    from?: string;
   };
 }) {
   const session = await getPassengerSession();
-  if (!session) redirect(`/login?next=/trips/${params.tripId}`);
+  if (!session) {
+    redirect(
+      buildLoginHref(pathWithSearch(`/trips/${params.tripId}`, searchParams)),
+    );
+  }
 
   const fareAmount = parseFare(searchParams.fare);
   const currency = searchParams.currency ?? 'LKR';
@@ -42,10 +53,19 @@ export default async function TripPage({
       ? formatDateTime(departure)
       : undefined;
 
+  const searchBackHref = safeInternalPath(searchParams.from, '/search');
+  const bookingHref = pathWithSearch(`/trips/${params.tripId}/booking`, {
+    fare: searchParams.fare,
+    currency: searchParams.currency,
+    routeId: searchParams.routeId,
+    departureAt: searchParams.departureAt,
+    from: searchParams.from,
+  });
+
   return (
     <div className="space-y-6">
       <PageHeader
-        backHref="/search"
+        backHref={searchBackHref}
         backLabel="Back to results"
         subtitle={
           [
@@ -65,6 +85,7 @@ export default async function TripPage({
       ) : null}
 
       <SeatMapClient
+        bookingHref={bookingHref}
         currency={currency}
         fareAmount={fareAmount}
         tripId={params.tripId}

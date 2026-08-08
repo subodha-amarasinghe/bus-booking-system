@@ -54,7 +54,7 @@ export function RegisterForm({ next }: { next: string }) {
           {...register('name')}
         />
         {errors.name && (
-          <p className="mt-1 text-xs text-rose-600">Tell us your name.</p>
+          <p className="mt-1 text-xs text-rose-600 dark:text-rose-300">Tell us your name.</p>
         )}
       </div>
 
@@ -71,13 +71,13 @@ export function RegisterForm({ next }: { next: string }) {
           {...register('phone')}
         />
         {errors.phone && (
-          <p className="mt-1 text-xs text-rose-600">Enter a mobile number.</p>
+          <p className="mt-1 text-xs text-rose-600 dark:text-rose-300">Enter a mobile number.</p>
         )}
       </div>
 
       <div>
         <label className="ui-label" htmlFor="email">
-          Email <span className="font-normal text-slate-400">(optional)</span>
+          Email <span className="font-normal text-slate-400 dark:text-slate-500">(optional)</span>
         </label>
         <input
           autoComplete="email"
@@ -87,7 +87,7 @@ export function RegisterForm({ next }: { next: string }) {
           {...register('email')}
         />
         {errors.email && (
-          <p className="mt-1 text-xs text-rose-600">
+          <p className="mt-1 text-xs text-rose-600 dark:text-rose-300">
             That email address looks incorrect.
           </p>
         )}
@@ -104,9 +104,9 @@ export function RegisterForm({ next }: { next: string }) {
           type="password"
           {...register('password')}
         />
-        <p className="mt-1 text-xs text-slate-500">At least 6 characters.</p>
+        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">At least 6 characters.</p>
         {errors.password && (
-          <p className="mt-1 text-xs text-rose-600">
+          <p className="mt-1 text-xs text-rose-600 dark:text-rose-300">
             Use a password with at least 6 characters.
           </p>
         )}

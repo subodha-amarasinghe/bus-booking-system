@@ -34,5 +34,9 @@ export type CancellationRequest = z.infer<typeof CancellationRequestSchema>;
 export const CalculateRefundRequestSchema = z.object({
   bookingId: z.string().uuid(),
   cancellationAt: z.coerce.date().optional(),
+  /** Hours remaining until departure; drives which policy tier applies. */
+  hoursBeforeDeparture: z.number().nonnegative().optional(),
+  /** Fare to base the refund on. Falls back to a stub amount when omitted. */
+  fareAmount: z.number().nonnegative().optional(),
 });
 export type CalculateRefundRequest = z.infer<typeof CalculateRefundRequestSchema>;

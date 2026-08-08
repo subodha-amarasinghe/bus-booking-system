@@ -52,7 +52,7 @@ export function LoginForm({ next }: { next: string }) {
           {...register('phone')}
         />
         {errors.phone && (
-          <p className="mt-1 text-xs text-rose-600">Enter your mobile number.</p>
+          <p className="mt-1 text-xs text-rose-600 dark:text-rose-300">Enter your mobile number.</p>
         )}
       </div>
 
@@ -68,7 +68,7 @@ export function LoginForm({ next }: { next: string }) {
           {...register('password')}
         />
         {errors.password && (
-          <p className="mt-1 text-xs text-rose-600">Enter your password.</p>
+          <p className="mt-1 text-xs text-rose-600 dark:text-rose-300">Enter your password.</p>
         )}
       </div>
 

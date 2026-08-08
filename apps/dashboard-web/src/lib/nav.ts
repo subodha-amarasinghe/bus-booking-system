@@ -3,6 +3,7 @@ import {
   Bus,
   CalendarClock,
   LayoutDashboard,
+  ScrollText,
   Ticket,
   Users,
   Waypoints,
@@ -58,5 +59,11 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'Cancellations',
     description: 'Cancel bookings, quote refunds, log payments.',
     icon: Ticket,
+  },
+  {
+    href: '/dashboard/cancellation-policy',
+    label: 'Cancel policy',
+    description: 'Set refund tiers by hours before departure.',
+    icon: ScrollText,
   },
 ];

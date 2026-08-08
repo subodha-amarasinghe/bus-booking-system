@@ -1,7 +1,11 @@
 import 'dotenv/config';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../src/generated/prisma/client';
-import { cancellations, refunds } from '../../../tools/seed/seed-data';
+import {
+  cancellationPolicies,
+  cancellations,
+  refunds,
+} from '../../../tools/seed/seed-data';
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) {
@@ -11,6 +15,14 @@ if (!connectionString) {
 const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
 
 async function main(): Promise<void> {
+  for (const policy of cancellationPolicies) {
+    await prisma.cancellationPolicy.upsert({
+      where: { id: policy.id },
+      update: policy,
+      create: policy,
+    });
+  }
+
   for (const cancellation of cancellations) {
     await prisma.cancellation.upsert({
       where: { id: cancellation.id },
@@ -29,7 +41,7 @@ async function main(): Promise<void> {
   }
 
   console.log(
-    `modification-service: seeded ${cancellations.length} cancellations, ${refunds.length} refunds`,
+    `modification-service: seeded ${cancellationPolicies.length} policies, ${cancellations.length} cancellations, ${refunds.length} refunds`,
   );
 }
 

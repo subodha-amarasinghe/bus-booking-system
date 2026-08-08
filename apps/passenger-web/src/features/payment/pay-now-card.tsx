@@ -7,6 +7,7 @@ import {
 } from '@bus-booking/shared-types';
 import { ArrowRight, CreditCard, ShieldCheck, Ticket } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { formatMoney } from '../../lib/format';
 import { AlertBanner } from '../../shared/components/AlertBanner';
@@ -25,6 +26,7 @@ export function PayNowCard({
   amount: number;
   currency: string;
 }) {
+  const router = useRouter();
   const [phase, setPhase] = useState<Phase>('idle');
   const [error, setError] = useState('');
   const [reference, setReference] = useState('');
@@ -63,6 +65,9 @@ export function PayNowCard({
       }
       setReference(payment.data?.providerRef ?? '');
       setPhase('paid');
+      // Drop the unpaid payment URL from history so Back doesn't reopen checkout.
+      router.replace('/bookings');
+      router.refresh();
     } catch {
       setError('We could not reach the payment service. Please try again.');
       setPhase('idle');
@@ -73,10 +78,10 @@ export function PayNowCard({
     return (
       <section className="ui-card space-y-4">
         <AlertBanner tone="success">
-          Payment received. Your seats are confirmed.
+          Payment received. Taking you to your bookings…
         </AlertBanner>
         {reference && (
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             Reference <span className="font-mono">{reference}</span>
           </p>
         )}
@@ -98,8 +103,8 @@ export function PayNowCard({
     <section className="ui-card space-y-4">
       <dl className="flex items-end justify-between gap-3">
         <div>
-          <dt className="text-sm text-slate-500">Amount due</dt>
-          <dd className="text-3xl font-bold tracking-tight text-slate-900">
+          <dt className="text-sm text-slate-500 dark:text-slate-400">Amount due</dt>
+          <dd className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
             {formatMoney(amount, currency)}
           </dd>
         </div>
@@ -125,7 +130,7 @@ export function PayNowCard({
         {phase === 'paying' ? 'Processing…' : `Pay ${formatMoney(amount, currency)}`}
       </button>
 
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-slate-500 dark:text-slate-400">
         Your card details never touch this app — the request is signed and
         forwarded by the payment service.
       </p>

@@ -49,3 +49,8 @@ export type Cancellation = Prisma.CancellationModel
  * 
  */
 export type Refund = Prisma.RefundModel
+/**
+ * Model CancellationPolicy
+ * Operator-configured refund tiers shown to passengers and used when quoting.
+ */
+export type CancellationPolicy = Prisma.CancellationPolicyModel

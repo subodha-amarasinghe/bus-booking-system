@@ -15,13 +15,15 @@ export function EmptyState({
 }) {
   return (
     <div className="ui-card flex flex-col items-center gap-3 py-10 text-center">
-      <span className="grid h-12 w-12 place-items-center rounded-2xl bg-brand-50 text-brand-600">
+      <span className="grid h-12 w-12 place-items-center rounded-2xl bg-brand-50 text-brand-600 dark:bg-brand-950 dark:text-brand-300">
         <Icon aria-hidden="true" className="h-6 w-6" />
       </span>
       <div>
-        <p className="text-base font-semibold text-slate-900">{title}</p>
+        <p className="text-base font-semibold text-slate-900 dark:text-slate-100">
+          {title}
+        </p>
         {description && (
-          <p className="mx-auto mt-1 max-w-sm text-sm text-slate-500">
+          <p className="mx-auto mt-1 max-w-sm text-sm text-slate-500 dark:text-slate-400">
             {description}
           </p>
         )}

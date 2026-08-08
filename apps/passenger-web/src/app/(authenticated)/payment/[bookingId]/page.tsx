@@ -4,7 +4,12 @@ import { redirect } from 'next/navigation';
 import { PayNowCard } from '../../../../features/payment/pay-now-card';
 import { getPassengerSession } from '../../../../lib/auth';
 import { getBookingById } from '../../../../lib/bookings';
-import { formatDateTime, formatMoney } from '../../../../lib/format';
+import {
+  buildLoginHref,
+  formatDateTime,
+  formatMoney,
+  pathWithSearch,
+} from '../../../../lib/format';
 import { AlertBanner } from '../../../../shared/components/AlertBanner';
 import { EmptyState } from '../../../../shared/components/EmptyState';
 import { PageHeader } from '../../../../shared/components/PageHeader';
@@ -33,7 +38,11 @@ export default async function PaymentPage({
   searchParams: { checkoutUrl?: string; amount?: string; currency?: string; seats?: string };
 }) {
   const session = await getPassengerSession();
-  if (!session) redirect(`/login?next=/payment/${params.bookingId}`);
+  if (!session) {
+    redirect(
+      buildLoginHref(pathWithSearch(`/payment/${params.bookingId}`, searchParams)),
+    );
+  }
 
   const booking = await getBookingById(params.bookingId);
   const checkoutUrl = safeCheckoutUrl(searchParams.checkoutUrl);
@@ -58,34 +67,34 @@ export default async function PaymentPage({
       <section className="ui-card space-y-3">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
               Booking reference
             </p>
-            <p className="font-mono text-sm text-slate-700">{params.bookingId}</p>
+            <p className="font-mono text-sm text-slate-700 dark:text-slate-200">{params.bookingId}</p>
           </div>
           {booking && <StatusBadge status={booking.status} />}
         </div>
 
-        <dl className="grid gap-3 border-t border-slate-100 pt-3 text-sm sm:grid-cols-2">
+        <dl className="grid gap-3 border-t border-slate-100 dark:border-slate-800 pt-3 text-sm sm:grid-cols-2">
           <div>
-            <dt className="text-slate-500">Seat{seats.length > 1 ? 's' : ''}</dt>
-            <dd className="flex items-center gap-1.5 font-semibold text-slate-900">
+            <dt className="text-slate-500 dark:text-slate-400">Seat{seats.length > 1 ? 's' : ''}</dt>
+            <dd className="flex items-center gap-1.5 font-semibold text-slate-900 dark:text-slate-100">
               <Armchair aria-hidden="true" className="h-4 w-4 text-brand-600" />
               {seats.length ? seats.join(', ') : booking?.seatNo ?? '—'}
             </dd>
           </div>
           {booking && (
             <div>
-              <dt className="text-slate-500">Booked</dt>
-              <dd className="font-semibold text-slate-900">
+              <dt className="text-slate-500 dark:text-slate-400">Booked</dt>
+              <dd className="font-semibold text-slate-900 dark:text-slate-100">
                 {formatDateTime(booking.createdAt)}
               </dd>
             </div>
           )}
           {amount !== undefined && (
             <div>
-              <dt className="text-slate-500">Total</dt>
-              <dd className="font-semibold text-slate-900">
+              <dt className="text-slate-500 dark:text-slate-400">Total</dt>
+              <dd className="font-semibold text-slate-900 dark:text-slate-100">
                 {formatMoney(amount, currency)}
               </dd>
             </div>
@@ -95,10 +104,10 @@ export default async function PaymentPage({
 
       {checkoutUrl ? (
         <section className="ui-card space-y-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
             Secure checkout
           </h2>
-          <div className="overflow-hidden rounded-xl border border-slate-200">
+          <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
             <iframe
               allow="payment"
               className="h-[520px] w-full"
@@ -106,7 +115,7 @@ export default async function PaymentPage({
               title="Secure hosted payment checkout"
             />
           </div>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             Payment is handled by our provider in the frame above.
           </p>
         </section>

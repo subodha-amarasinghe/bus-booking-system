@@ -34,3 +34,15 @@ model Refund {
   updatedAt      DateTime  @updatedAt
   cancellation   Cancellation @relation(fields: [cancellationId], references: [id])
 }
+
+/// Operator-configured refund tiers shown to passengers and used when quoting.
+model CancellationPolicy {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  /// JSON array of { minHoursBeforeDeparture, refundPercent, label? }
+  rules       Json
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

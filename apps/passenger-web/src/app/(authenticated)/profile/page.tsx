@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { LogoutButton } from '../../../features/my-bookings/logout-button';
 import { getPassengerSession } from '../../../lib/auth';
+import { buildLoginHref } from '../../../lib/format';
 import { getPassengerProfile } from '../../../lib/profile';
 import { PageHeader } from '../../../shared/components/PageHeader';
 import { StatusBadge } from '../../../shared/components/StatusBadge';
@@ -26,7 +27,7 @@ const QUICK_LINKS = [
 
 export default async function ProfilePage() {
   const session = await getPassengerSession();
-  if (!session) redirect('/login?next=/profile');
+  if (!session) redirect(buildLoginHref('/profile'));
 
   const profile = await getPassengerProfile(session.userId);
   const phone = profile?.phone ?? session.phone;
@@ -42,35 +43,35 @@ export default async function ProfilePage() {
 
       <section className="ui-card space-y-5">
         <div className="flex items-center gap-3">
-          <span className="grid h-12 w-12 place-items-center rounded-2xl bg-brand-50 text-brand-600">
+          <span className="grid h-12 w-12 place-items-center rounded-2xl bg-brand-50 dark:bg-brand-950 text-brand-600">
             <UserRound aria-hidden="true" className="h-6 w-6" />
           </span>
           <div className="min-w-0">
-            <p className="truncate text-lg font-bold text-slate-900">
+            <p className="truncate text-lg font-bold text-slate-900 dark:text-slate-100">
               {displayName}
             </p>
             {role && <StatusBadge className="mt-1" status={role} />}
           </div>
         </div>
 
-        <dl className="grid gap-3 border-t border-slate-100 pt-4 text-sm">
+        <dl className="grid gap-3 border-t border-slate-100 dark:border-slate-800 pt-4 text-sm">
           <div className="flex items-baseline justify-between gap-3">
-            <dt className="text-slate-500">Mobile</dt>
-            <dd className="font-medium text-slate-900">
+            <dt className="text-slate-500 dark:text-slate-400">Mobile</dt>
+            <dd className="font-medium text-slate-900 dark:text-slate-100">
               {phone ?? 'Not available'}
             </dd>
           </div>
           {profile?.email && (
             <div className="flex items-baseline justify-between gap-3">
-              <dt className="text-slate-500">Email</dt>
-              <dd className="truncate font-medium text-slate-900">
+              <dt className="text-slate-500 dark:text-slate-400">Email</dt>
+              <dd className="truncate font-medium text-slate-900 dark:text-slate-100">
                 {profile.email}
               </dd>
             </div>
           )}
           <div className="flex items-baseline justify-between gap-3">
-            <dt className="text-slate-500">User ID</dt>
-            <dd className="truncate font-mono text-xs text-slate-600">
+            <dt className="text-slate-500 dark:text-slate-400">User ID</dt>
+            <dd className="truncate font-mono text-xs text-slate-600 dark:text-slate-300">
               {session.userId}
             </dd>
           </div>
@@ -81,7 +82,7 @@ export default async function ProfilePage() {
 
       <section aria-labelledby="quick-links-heading">
         <h2
-          className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500"
+          className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
           id="quick-links-heading"
         >
           Quick links
@@ -90,17 +91,17 @@ export default async function ProfilePage() {
           {QUICK_LINKS.map((link) => (
             <li key={link.href}>
               <Link
-                className="ui-card flex min-h-[44px] items-start gap-3 transition hover:border-brand-300 hover:bg-brand-50/40"
+                className="ui-card flex min-h-[44px] items-start gap-3 transition hover:border-brand-300 hover:bg-brand-50 dark:bg-brand-950/40"
                 href={link.href}
               >
-                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-600">
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-brand-50 dark:bg-brand-950 text-brand-600">
                   <link.icon aria-hidden="true" className="h-4 w-4" />
                 </span>
                 <span>
-                  <span className="block text-sm font-semibold text-slate-900">
+                  <span className="block text-sm font-semibold text-slate-900 dark:text-slate-100">
                     {link.title}
                   </span>
-                  <span className="block text-sm text-slate-500">{link.body}</span>
+                  <span className="block text-sm text-slate-500 dark:text-slate-400">{link.body}</span>
                 </span>
               </Link>
             </li>

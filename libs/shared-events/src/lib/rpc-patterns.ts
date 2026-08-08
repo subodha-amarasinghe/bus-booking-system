@@ -34,3 +34,5 @@ export const PAYMENT_RECORD_OFFLINE = 'payment.recordOffline' as const;
 
 export const CANCELLATION_REQUEST = 'cancellation.request' as const;
 export const REFUND_CALCULATE = 'refund.calculate' as const;
+export const CANCELLATION_POLICY_GET = 'cancellation.policy.get' as const;
+export const CANCELLATION_POLICY_UPSERT = 'cancellation.policy.upsert' as const;

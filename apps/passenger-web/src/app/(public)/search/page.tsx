@@ -11,6 +11,7 @@ import {
   formatDuration,
   formatMoney,
   formatTime,
+  pathWithSearch,
   shiftDateInputValue,
   toDateInputValue,
 } from '../../../lib/format';
@@ -55,41 +56,47 @@ async function searchTrips(searchParams: Params): Promise<Trip[]> {
 function TripCard({
   trip,
   route,
+  searchFrom,
 }: {
   trip: Trip;
   route?: RouteLabel;
+  /** Current search URL so "Back to results" restores filters. */
+  searchFrom: string;
 }) {
   const duration = formatDuration(trip.departureAt, trip.arrivalAt);
   const seatsLeft = trip.availableSeats;
   const soldOut = seatsLeft === 0;
+  const tripHref = `/trips/${trip.id}?routeId=${trip.routeId}&fare=${trip.fareAmount}&currency=${trip.currency}&departureAt=${encodeURIComponent(
+    new Date(trip.departureAt).toISOString(),
+  )}&from=${encodeURIComponent(searchFrom)}`;
 
   return (
     <li className="ui-card">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
             {formatDate(trip.departureAt)}
           </p>
           <p className="mt-1 flex items-baseline gap-2">
-            <span className="text-2xl font-bold tracking-tight text-slate-900">
+            <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
               {formatTime(trip.departureAt)}
             </span>
             {trip.arrivalAt && (
               <>
-                <ArrowRight aria-hidden="true" className="h-4 w-4 text-slate-400" />
-                <span className="text-lg font-semibold text-slate-700">
+                <ArrowRight aria-hidden="true" className="h-4 w-4 text-slate-400 dark:text-slate-500" />
+                <span className="text-lg font-semibold text-slate-700 dark:text-slate-200">
                   {formatTime(trip.arrivalAt)}
                 </span>
               </>
             )}
           </p>
-          <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-slate-600">
+          <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-slate-600 dark:text-slate-300">
             <Bus aria-hidden="true" className="h-4 w-4 text-brand-600" />
             {route?.origin && route.destination
               ? `${route.origin} → ${route.destination}`
               : route?.name ?? 'Intercity service'}
             {route?.routeNumber ? (
-              <span className="rounded-md bg-brand-50 px-2 py-0.5 font-bold text-brand-700">
+              <span className="rounded-md bg-brand-50 dark:bg-brand-950 px-2 py-0.5 font-bold text-brand-700 dark:text-brand-300">
                 [{route.routeNumber}]
               </span>
             ) : null}
@@ -97,17 +104,17 @@ function TripCard({
         </div>
 
         <div className="text-right">
-          <p className="text-xl font-bold text-slate-900">
+          <p className="text-xl font-bold text-slate-900 dark:text-slate-100">
             {formatMoney(trip.fareAmount, trip.currency)}
           </p>
-          <p className="text-xs text-slate-500">per seat</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">per seat</p>
           <StatusBadge className="mt-2" status={trip.status} />
         </div>
       </div>
 
-      <dl className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-slate-600">
+      <dl className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-slate-600 dark:text-slate-300">
         <div className="flex items-center gap-1.5">
-          <Armchair aria-hidden="true" className="h-4 w-4 text-slate-400" />
+          <Armchair aria-hidden="true" className="h-4 w-4 text-slate-400 dark:text-slate-500" />
           <dt className="sr-only">Seats available</dt>
           <dd>
             {seatsLeft === undefined
@@ -117,7 +124,7 @@ function TripCard({
         </div>
         {duration && (
           <div className="flex items-center gap-1.5">
-            <Clock aria-hidden="true" className="h-4 w-4 text-slate-400" />
+            <Clock aria-hidden="true" className="h-4 w-4 text-slate-400 dark:text-slate-500" />
             <dt className="sr-only">Journey time</dt>
             <dd>{duration}</dd>
           </div>
@@ -125,15 +132,13 @@ function TripCard({
       </dl>
 
       {soldOut ? (
-        <p className="mt-4 text-sm font-medium text-slate-500">
+        <p className="mt-4 text-sm font-medium text-slate-500 dark:text-slate-400">
           This departure is fully booked.
         </p>
       ) : (
         <Link
           className="ui-btn-primary mt-4 min-h-[48px] w-full sm:w-auto"
-          href={`/trips/${trip.id}?routeId=${trip.routeId}&fare=${trip.fareAmount}&currency=${trip.currency}&departureAt=${encodeURIComponent(
-            new Date(trip.departureAt).toISOString(),
-          )}`}
+          href={tripHref}
         >
           Select seats
           <ArrowRight aria-hidden="true" className="h-4 w-4" />
@@ -176,6 +181,12 @@ export default async function SearchPage({
       })
     : [];
 
+  const searchFrom = pathWithSearch('/search', {
+    originLocationId,
+    destinationLocationId,
+    departureDate,
+  });
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -191,7 +202,7 @@ export default async function SearchPage({
 
       <section aria-labelledby="refine-heading" className="ui-card">
         <h2
-          className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-500"
+          className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
           id="refine-heading"
         >
           Refine your search
@@ -234,7 +245,7 @@ export default async function SearchPage({
       ) : (
         <section aria-labelledby="results-heading">
           <h2
-            className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500"
+            className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
             id="results-heading"
           >
             {trips.length} departure{trips.length === 1 ? '' : 's'}
@@ -244,6 +255,7 @@ export default async function SearchPage({
               <TripCard
                 key={trip.id}
                 route={routeLabels[trip.routeId]}
+                searchFrom={searchFrom}
                 trip={trip}
               />
             ))}

@@ -42,11 +42,14 @@ export function SeatMapClient({
   userId,
   fareAmount,
   currency = 'LKR',
+  bookingHref,
 }: {
   tripId: string;
   userId: string;
   fareAmount?: number;
   currency?: string;
+  /** Passenger-details URL with trip context query preserved. */
+  bookingHref?: string;
 }) {
   const seatMap = useSeatMap(passengerApi, tripId);
   const draft = useBookingDraft(passengerApi);
@@ -54,6 +57,11 @@ export function SeatMapClient({
   const remaining = useRemainingSeconds(draft.expiresAt);
   const [wsToken, setWsToken] = useState<string | null>(null);
   const [error, setError] = useState('');
+  const continueHref =
+    bookingHref ??
+    (fareAmount === undefined
+      ? `/trips/${tripId}/booking`
+      : `/trips/${tripId}/booking?fare=${fareAmount}&currency=${currency}`);
 
   useEffect(() => {
     startTrip(tripId);
@@ -157,7 +165,7 @@ export function SeatMapClient({
       <section className="ui-card space-y-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <SeatLegend />
-          <p className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+          <p className="flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
             <span
               aria-hidden="true"
               className={clsx(
@@ -173,8 +181,8 @@ export function SeatMapClient({
           </p>
         </div>
 
-        <div className="rounded-2xl bg-slate-50 p-3 sm:p-4">
-          <p className="mb-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-400">
+        <div className="rounded-2xl bg-slate-50 dark:bg-slate-950 p-3 sm:p-4">
+          <p className="mb-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
             Front of bus
           </p>
           <SeatGrid
@@ -194,7 +202,7 @@ export function SeatMapClient({
 
         {error && <AlertBanner>{error}</AlertBanner>}
 
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-slate-500 dark:text-slate-400">
           {hasHold
             ? 'Held seats are released automatically if you leave this page.'
             : 'Hold your seats to reserve them while you enter passenger details.'}
@@ -204,7 +212,7 @@ export function SeatMapClient({
       {/* Compact enough that it never hides more than one row of seats. */}
       <section className="ui-card sticky bottom-4 z-20 flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5">
-          <p className="text-sm font-semibold text-slate-900">
+          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
             {draft.selectedSeats.length
               ? `${draft.selectedSeats.length} seat${draft.selectedSeats.length === 1 ? '' : 's'}`
               : 'No seats selected'}
@@ -219,7 +227,7 @@ export function SeatMapClient({
             </ul>
           )}
           {total !== undefined && total > 0 && (
-            <span className="text-sm font-bold text-slate-900">
+            <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
               {formatMoney(total, currency)}
             </span>
           )}
@@ -229,8 +237,8 @@ export function SeatMapClient({
               className={clsx(
                 'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-sm font-bold tabular-nums',
                 urgent
-                  ? 'bg-rose-100 text-rose-700'
-                  : 'bg-amber-100 text-amber-800',
+                  ? 'bg-rose-100 text-rose-700 dark:text-rose-200'
+                  : 'bg-amber-100 text-amber-800 dark:text-amber-200',
               )}
               role="status"
             >
@@ -253,11 +261,7 @@ export function SeatMapClient({
           ) : hasHold ? (
             <Link
               className="ui-btn-primary min-h-[48px] w-full sm:w-auto"
-              href={
-                fareAmount === undefined
-                  ? `/trips/${tripId}/booking`
-                  : `/trips/${tripId}/booking?fare=${fareAmount}&currency=${currency}`
-              }
+              href={continueHref}
               onClick={() => {
                 continuingRef.current = true;
               }}

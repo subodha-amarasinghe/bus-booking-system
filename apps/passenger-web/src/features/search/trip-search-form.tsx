@@ -2,7 +2,7 @@
 
 import { SearchTripsRequestSchema } from '@bus-booking/shared-types';
 import { ArrowLeftRight, CalendarDays, MapPin, Search } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import type { LocationOption } from '../../lib/locations';
 import { toDateInputValue } from '../../lib/format';
@@ -32,6 +32,7 @@ export function TripSearchForm({
   submitLabel?: string;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [origin, setOrigin] = useState(defaults?.originLocationId ?? '');
   const [destination, setDestination] = useState(
     defaults?.destinationLocationId ?? '',
@@ -74,7 +75,13 @@ export function TripSearchForm({
       destinationLocationId: destination,
     });
     if (departureDate) params.set('departureDate', departureDate);
-    router.push(`/search?${params.toString()}`);
+    const href = `/search?${params.toString()}`;
+    // Refining on the results page should not stack identical search entries.
+    if (pathname === '/search') {
+      router.replace(href);
+    } else {
+      router.push(href);
+    }
   }
 
   const noLocations = locations.length === 0;
@@ -121,7 +128,7 @@ export function TripSearchForm({
               </span>
             </label>
             <button
-              className="mb-1.5 inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-brand-700 hover:bg-brand-50"
+              className="mb-1.5 inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-brand-700 dark:text-brand-300 hover:bg-brand-50 dark:bg-brand-950"
               onClick={swap}
               type="button"
             >

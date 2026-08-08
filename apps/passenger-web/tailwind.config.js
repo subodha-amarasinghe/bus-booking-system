@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: 'class',
   content: [
     './src/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
@@ -18,10 +19,12 @@ module.exports = {
           700: '#1d4ed8',
           800: '#1e40af',
           900: '#1e3a8a',
+          950: '#172554',
         },
       },
       boxShadow: {
         soft: '0 8px 30px rgba(15, 23, 42, 0.06)',
+        'soft-dark': '0 8px 30px rgba(0, 0, 0, 0.35)',
       },
       fontFamily: {
         sans: [
