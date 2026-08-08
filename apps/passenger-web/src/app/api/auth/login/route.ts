@@ -1,6 +1,10 @@
 import { LoginRequestSchema } from '@bus-booking/shared-types';
 import { NextRequest, NextResponse } from 'next/server';
-import { ACCESS_COOKIE, REFRESH_COOKIE } from '../../../../lib/auth';
+import {
+  ACCESS_COOKIE,
+  REFRESH_COOKIE,
+  RETURN_TO_COOKIE,
+} from '../../../../lib/auth';
 import { API_GATEWAY_URL } from '../../../../lib/route-proxy';
 
 export async function POST(request: NextRequest) {
@@ -41,6 +45,10 @@ export async function POST(request: NextRequest) {
   response.cookies.set(REFRESH_COOKIE, data.refreshToken, {
     ...options,
     maxAge: 60 * 60 * 24 * 30,
+  });
+  response.cookies.set(RETURN_TO_COOKIE, '', {
+    ...options,
+    maxAge: 0,
   });
   return response;
 }

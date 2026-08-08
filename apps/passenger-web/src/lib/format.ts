@@ -59,9 +59,35 @@ export function shiftDateInputValue(value: string, days: number): string {
 }
 
 /** Guards `?next=` redirects so only in-app paths (with optional query) are followed. */
-export function safeInternalPath(value: string | undefined, fallback: string): string {
-  if (!value || !value.startsWith('/') || value.startsWith('//')) return fallback;
-  return value;
+export function safeInternalPath(
+  value: string | undefined | null,
+  fallback: string,
+): string {
+  if (!value) return fallback;
+  const trimmed = value.trim();
+  if (!trimmed.startsWith('/') || trimmed.startsWith('//')) return fallback;
+  // Block protocol-relative and embedded schemes after the path.
+  if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(trimmed)) return fallback;
+  return trimmed;
+}
+
+/**
+ * Prefer a meaningful `?next=`, then the return-to cookie, then fallback.
+ * Cookie backs up cases where client redirects drop nested trip query strings.
+ */
+export function resolvePostAuthPath(
+  nextParam: string | string[] | undefined,
+  cookieValue: string | undefined,
+  fallback = '/',
+): string {
+  const fromQuery = Array.isArray(nextParam) ? nextParam[0] : nextParam;
+  const queryPath = safeInternalPath(fromQuery, '');
+  if (queryPath && queryPath !== '/') return queryPath;
+
+  const cookiePath = safeInternalPath(cookieValue, '');
+  if (cookiePath) return cookiePath;
+
+  return queryPath || fallback;
 }
 
 /** Builds `/login?next=…` preserving path + query for post-auth return. */

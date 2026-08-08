@@ -2,17 +2,17 @@ import { ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { LoginForm } from '../../../features/auth/login-form';
-import { getPassengerSession } from '../../../lib/auth';
-import { safeInternalPath } from '../../../lib/format';
+import { getPassengerSession, getReturnToCookie } from '../../../lib/auth';
+import { resolvePostAuthPath } from '../../../lib/format';
 
 export const metadata = { title: 'Sign in · Bus Booking' };
 
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: { next?: string };
+  searchParams: { next?: string | string[] };
 }) {
-  const next = safeInternalPath(searchParams.next, '/');
+  const next = resolvePostAuthPath(searchParams.next, getReturnToCookie(), '/');
   const session = await getPassengerSession();
   if (session) redirect(next);
 
@@ -42,7 +42,7 @@ export default async function LoginPage({
         </p>
       </section>
 
-      <aside className="rounded-2xl border border-brand-100 dark:border-brand-900 bg-brand-50 dark:bg-brand-950 p-4 text-sm text-brand-900 dark:text-brand-100">
+      <aside className="rounded-2xl border border-brand-100 bg-brand-50 p-4 text-sm text-brand-900 dark:border-brand-900 dark:bg-brand-950 dark:text-brand-100">
         <p className="flex items-center gap-2 font-semibold">
           <ShieldCheck aria-hidden="true" className="h-4 w-4" />
           Demo passenger

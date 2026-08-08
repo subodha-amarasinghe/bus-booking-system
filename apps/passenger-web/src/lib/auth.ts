@@ -2,6 +2,8 @@ import { cookies } from 'next/headers';
 
 export const ACCESS_COOKIE = 'passenger_access_token';
 export const REFRESH_COOKIE = 'passenger_refresh_token';
+/** Short-lived post-login return path (path + query). Survives `?next=` being dropped. */
+export const RETURN_TO_COOKIE = 'passenger_return_to';
 
 const API_GATEWAY_URL =
   process.env.API_GATEWAY_URL ?? 'http://localhost:3000/api';
@@ -48,4 +50,9 @@ export function getAccessToken(): string | undefined {
  */
 export function hasPassengerCookie(): boolean {
   return Boolean(cookies().get(ACCESS_COOKIE)?.value);
+}
+
+/** Reads the pending post-auth return path from the short-lived cookie. */
+export function getReturnToCookie(): string | undefined {
+  return cookies().get(RETURN_TO_COOKIE)?.value;
 }

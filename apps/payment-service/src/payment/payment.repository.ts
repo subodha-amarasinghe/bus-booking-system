@@ -20,13 +20,24 @@ export class PaymentRepository {
     return this.prisma.payment.create({ data });
   }
 
+  findById(id: string): Promise<Payment | null> {
+    return this.prisma.payment.findUnique({ where: { id } });
+  }
+
+  findByProviderRef(providerRef: string): Promise<Payment | null> {
+    return this.prisma.payment.findFirst({
+      where: { providerRef },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   update(
     id: string,
     data: Partial<{
       status: string;
       providerRef: string;
-      failureReason: string;
-      paidAt: Date;
+      failureReason: string | null;
+      paidAt: Date | null;
     }>,
   ): Promise<Payment> {
     return this.prisma.payment.update({ where: { id }, data });

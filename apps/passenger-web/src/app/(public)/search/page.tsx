@@ -188,26 +188,30 @@ export default async function SearchPage({
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-5">
       <PageHeader
         backHref="/"
         backLabel="Home"
+        compact
         subtitle={
           journey
             ? `${journey}${departureDate ? ` · ${formatDate(departureDate)}` : ''}`
             : 'Pick an origin and destination to see departures.'
         }
-        title="Available buses"
       />
 
-      <section aria-labelledby="refine-heading" className="ui-card">
+      <section
+        aria-labelledby="refine-heading"
+        className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-950 sm:p-4 lg:p-3"
+      >
         <h2
-          className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+          className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 lg:sr-only"
           id="refine-heading"
         >
           Refine your search
         </h2>
         <TripSearchForm
+          compact
           defaults={{ originLocationId, destinationLocationId, departureDate }}
           locations={locations}
           submitLabel="Update results"

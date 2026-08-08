@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Linking, StyleSheet, Text, View } from 'react-native';
 import { AuthGate } from '../../components/AuthGate';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
@@ -47,14 +47,22 @@ function PaymentPanel({
   async function submit() {
     setError('');
     try {
+      const webOrigin =
+        process.env.EXPO_PUBLIC_PASSENGER_WEB_ORIGIN ?? 'http://localhost:3200';
       const payment = await pay.mutateAsync({
         bookingId,
         userId: session.userId,
         amount,
         currency,
+        returnUrl: `${webOrigin}/payment/${bookingId}?status=success&session_id={CHECKOUT_SESSION_ID}`,
+        cancelUrl: `${webOrigin}/payment/${bookingId}?status=cancelled`,
       });
       if (payment.status === 'FAILED') {
         setError(payment.failureReason ?? 'The payment was declined.');
+        return;
+      }
+      if (payment.checkoutUrl) {
+        await Linking.openURL(payment.checkoutUrl);
         return;
       }
       setPaid(true);
@@ -123,8 +131,8 @@ function PaymentPanel({
           <Text style={styles.payTitle}>Pay online</Text>
         </View>
         <Text style={styles.payBody}>
-          Your card is charged through the secure payment service. Seats stay
-          held until the payment clears.
+          Opens Stripe Checkout in your browser. Card details never touch this
+          app; the booking updates when Stripe confirms the payment.
         </Text>
         <Button
           fullWidth

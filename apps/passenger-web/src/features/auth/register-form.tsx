@@ -6,14 +6,12 @@ import {
   type RegisterRequest,
 } from '@bus-booking/shared-types';
 import { UserRoundPlus } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { AlertBanner } from '../../shared/components/AlertBanner';
 import { Spinner } from '../../shared/components/LoadingBlock';
 
 export function RegisterForm({ next }: { next: string }) {
-  const router = useRouter();
   const [error, setError] = useState('');
   const {
     register,
@@ -37,8 +35,7 @@ export function RegisterForm({ next }: { next: string }) {
       setError(body.message ?? 'We could not create your account.');
       return;
     }
-    router.replace(next);
-    router.refresh();
+    window.location.assign(next || '/');
   }
 
   return (
